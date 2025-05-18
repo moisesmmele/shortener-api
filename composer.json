@@ -1,0 +1,25 @@
+{
+    "name": "moises/shortener-api",
+    "description": "Simple URL shortener and tracker api made with PHP. For studying purposes.",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Moises\\ShortenerApi\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Moisés Menezes Mele",
+            "email": "moisesmmele@gmail.com"
+        }
+    ],
+    "require": {
+      "ext-ctype": "*",
+      "ext-pdo": "*",
+      "ext-http": "*",
+        "symfony/http-foundation": "^7.2"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^7.2"
+    }
+}
