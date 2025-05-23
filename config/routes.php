@@ -1,21 +1,21 @@
 <?php
 
-return function ($router) {
-    $router->register(method: 'GET', uri: '/', action: function () {
-        http_response_code(200);
-        header('Content-Type: application/json');
-        echo json_encode([
-            'status' => "OK",
-            'status_code' => 200,
+use Laminas\Diactoros\Response\JsonResponse;
+use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
+use Moises\ShortenerApi\Infrastructure\Controllers\ClickController;
+use Moises\ShortenerApi\Infrastructure\Controllers\TestController;
+use Psr\Http\Message\ServerRequestInterface as Request;
+
+return function (RouterInterface $router) {
+    $router->get('/test', function (Request $request) {
+        return new JsonResponse([
+            'status' => 'OK',
             'message' => 'Hello World!',
+            'php_version' => phpversion(),
+            'request_data' => $request->getServerParams(),
         ]);
     });
-    $router->register(method: 'GET', uri: '/test', action: function () {
-        http_response_code(200);
-        header('Content-Type:text/html; charset=utf-8');
-        echo "<a href='http://172.16.99.86:8083/cb14ko'>link</a>";
-    });
-    $router->register(method: 'POST', uri: '/register', action: [Moises\ShortenerApi\Application\ServiceHub::class, 'register']);
-    $router->register(method: 'GET', uri: '/registered-links', action: [Moises\ShortenerApi\Application\ServiceHub::class, 'getAllLinks']);
-    $router->register(method: 'GET', uri: '/tracker/:shortcode', action: [Moises\ShortenerApi\Application\ServiceHub::class, 'getLinkClicks']);
+    $router->get('/router', [TestController::class, 'index']);
+    $router->get('/pdo', [ClickController::class, 'index']);
+
 };

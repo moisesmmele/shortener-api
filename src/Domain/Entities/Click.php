@@ -9,6 +9,7 @@ class Click
     private string $utcTimestamp;
     private string $sourceIp;
     private string $referrer;
+    private string $flag;
 
     public function getId(): int
     {
@@ -69,6 +70,14 @@ class Click
     {
         $sanitized = filter_var($referrer, FILTER_SANITIZE_URL);
         $this->referrer = $sanitized;
+    }
+    public function getFlag(): string
+    {
+        return $this->flag;
+    }
+    public function setFlag(string $flag): void
+    {
+        $this->flag = $flag;
     }
 
 }

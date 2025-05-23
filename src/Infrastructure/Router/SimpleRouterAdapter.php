@@ -1,15 +1,18 @@
 <?php
 
-namespace Moises\ShortenerApi\Application;
+namespace Moises\ShortenerApi\Infrastructure\Router;
 
+use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
+use Moises\ShortenerApi\Application\ServiceHub;
 use Symfony\Component\HttpFoundation\Request;
 
-class Router
+class SimpleRouterAdapter implements RouterInterface
 {
     private array $routes = [];
 
     public function __construct()
     {
+        throw new \Exception(message: "This router adapter is deprecated and it WILL NOT work.");
         $this->loadRoutes();
     }
 

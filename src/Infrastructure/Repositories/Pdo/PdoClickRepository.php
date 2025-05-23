@@ -1,10 +1,11 @@
 <?php
 
-namespace Moises\ShortenerApi\Application\Repositories\Pdo;
+namespace Moises\ShortenerApi\Infrastructure\Repositories\Pdo;
 
 use Moises\ShortenerApi\Domain\Entities\Click;
 use Moises\ShortenerApi\Domain\Entities\Link;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
+use const Moises\ShortenerApi\Application\Repositories\Pdo\DB;
 
 class PdoClickRepository implements ClickRepository
 {

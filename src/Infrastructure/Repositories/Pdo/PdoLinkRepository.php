@@ -1,10 +1,11 @@
 <?php
 
-namespace Moises\ShortenerApi\Application\Repositories\Pdo;
+namespace Moises\ShortenerApi\Infrastructure\Repositories\Pdo;
 
 use Moises\ShortenerApi\Domain\Entities\Link;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
 use PDO;
+use const Moises\ShortenerApi\Application\Repositories\Pdo\DB;
 
 class PdoLinkRepository implements LinkRepository
 {

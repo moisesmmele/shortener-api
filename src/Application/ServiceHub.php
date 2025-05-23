@@ -2,13 +2,13 @@
 
 namespace Moises\ShortenerApi\Application;
 
-use Moises\ShortenerApi\Application\Repositories\Pdo\PdoClickRepository;
+use Moises\ShortenerApi\Domain\Services\ShortenerService;
+use Moises\ShortenerApi\Domain\Services\TrackerService;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
-use Symfony\Component\HttpFoundation\Request;
-use Moises\ShortenerApi\Application\Repositories\Pdo\PdoLinkRepository;
-use Moises\ShortenerApi\Domain\Logic\Shortener;
-use Moises\ShortenerApi\Domain\Logic\Tracker;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
+use Moises\ShortenerApi\Infrastructure\Repositories\Pdo\PdoClickRepository;
+use Moises\ShortenerApi\Infrastructure\Repositories\Pdo\PdoLinkRepository;
+use Symfony\Component\HttpFoundation\Request;
 
 class ServiceHub
 {
@@ -30,7 +30,7 @@ class ServiceHub
                 $this->notFound($message);
                 return;
             }
-            $tracker = new Tracker();
+            $tracker = new TrackerService();
             $clientIp = $request->getClientIp();
             if (empty($request->headers->get('referer'))) {
                 $referrer = 'Direct Access';
@@ -57,7 +57,7 @@ class ServiceHub
     public function register(Request $request)
     {
         $body = json_decode($request->getContent(), true);
-        $shortener = new Shortener();
+        $shortener = new ShortenerService();
         $link = $shortener->generate($body['url']);
         try {
             $this->linkRepository->save($link);
