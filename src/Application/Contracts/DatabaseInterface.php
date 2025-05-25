@@ -2,7 +2,7 @@
 
 namespace Moises\ShortenerApi\Application\Contracts;
 
-interface ControllerInterface
+interface DatabaseInterface
 {
 
 }

@@ -2,11 +2,12 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Controllers;
 
+use Laminas\Diactoros\Response\RedirectResponse;
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewClickUseCase;
+use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Laminas\Diactoros\Response\JsonResponse;
 
 class ClickController
 {
@@ -15,10 +16,24 @@ class ClickController
     {
         $this->useCaseFactory = $useCaseFactory;
     }
-    public function create(RequestInterface $request): ResponseInterface
+    public function click(RequestInterface $request): ResponseInterface
     {
-        $useCase = $this->useCaseFactory->create(RegisterNewClickUseCase::class);
-        $useCase->execute($request->getUri());
-        return new JsonResponse(["status" => "Success"])->withStatus(201);
+        /** @var ResolveShortenedLinkUseCase $resolveShortenedLinkUseCase */
+        $resolveShortenedLinkUseCase = $this->useCaseFactory->create(ResolveShortenedLinkUseCase::class);
+
+        /** @var RegisterNewClickUseCase $registerNewClickUseCase */
+        $registerNewClickUseCase = $this->useCaseFactory->create(RegisterNewClickUseCase::class);
+
+        $shortcode = str_replace('/', '', $request->getUri()->getPath());
+        $sourceAddress = $request->getServerParams()['REMOTE_ADDR'];
+        $referrerAddress = $request->getHeaderLine('Referer');
+
+        $linkDto = $resolveShortenedLinkUseCase
+            ->execute(shortcode: $shortcode);
+
+        $registerNewClickUseCase
+            ->execute(linkDto: $linkDto, sourceAddress: $sourceAddress, referrerAddress: $referrerAddress);
+
+        return new RedirectResponse($linkDto->getLongUrl());
     }
 }

@@ -2,34 +2,36 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Pdo;
 
+use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
+use Moises\ShortenerApi\Infrastructure\Database\SqlitePdoAdapter;
+use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 use Moises\ShortenerApi\Domain\Entities\Click;
 use Moises\ShortenerApi\Domain\Entities\Link;
-use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
-use const Moises\ShortenerApi\Application\Repositories\Pdo\DB;
 
 class PdoClickRepository implements ClickRepository
 {
-    private \PDO $pdo;
-    public function __construct()
+    private DatabaseInterface $database;
+    public function __construct(SqlitePdoAdapter $database)
     {
-        $this->pdo = DB;
+        $this->database = $database;
     }
 
     public function save(Click $click)
     {
-        $this->pdo->beginTransaction();
+        $pdo = $this->database->getPdo();
+        $pdo->beginTransaction();
         try {
             $sql = "INSERT INTO clicks (link_id, utc_timestamp, source_ip, referrer) 
                         VALUES(:link_id, :utc_timestamp, :source_ip, :referrer)";
-            $stmt = $this->pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':link_id', $click->getLinkId());
             $stmt->bindValue(':utc_timestamp', $click->getUtcTimestamp());
             $stmt->bindValue(':source_ip', $click->getSourceIp());
             $stmt->bindValue(':referrer', $click->getReferrer());
             $stmt->execute();
-            $this->pdo->commit();
+            $pdo->commit();
         } catch (\Exception $exception) {
-            $this->pdo->rollBack();
+            $pdo->rollBack();
             throw $exception;
         }
     }
@@ -37,8 +39,9 @@ class PdoClickRepository implements ClickRepository
     public function findByLink(Link $link)
     {
         try {
+            $pdo = $this->database->getPdo();
             $sql = "SELECT * FROM clicks WHERE link_id = :link_id";
-            $stmt = $this->pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':link_id', $link->getId());
             $stmt->execute();
             $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);

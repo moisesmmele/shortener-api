@@ -2,7 +2,8 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Database;
 
-use Moises\ShortenerApi\Application\Contracts\Database\DatabaseInterface;
+
+use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
 
 class SqlitePdoAdapter implements DatabaseInterface
 {
@@ -21,5 +22,9 @@ class SqlitePdoAdapter implements DatabaseInterface
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         $result = $row['sqlite_version()'];
         return $result;
+    }
+    public function getPdo()
+    {
+        return $this->pdo;
     }
 }

@@ -2,39 +2,42 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Pdo;
 
+use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
 use Moises\ShortenerApi\Domain\Entities\Link;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
+use Moises\ShortenerApi\Infrastructure\Database\SqlitePdoAdapter;
 use PDO;
-use const Moises\ShortenerApi\Application\Repositories\Pdo\DB;
 
 class PdoLinkRepository implements LinkRepository
 {
-    private \PDO $pdo;
-    public function __construct()
+    private DatabaseInterface $database;
+    public function __construct(SqlitePdoAdapter $database)
     {
-        $this->pdo = DB;
+        $this->database = $database;
     }
 
     public function save(Link $link)
     {
+        $pdo = $this->database->getPdo();
         try {
-            $this->pdo->beginTransaction();
+            $pdo->beginTransaction();
             $query = "INSERT INTO links ('long_url', 'shortcode') VALUES (:long_url, :short_code)";
-            $stmt = $this->pdo->prepare($query);
+            $stmt = $pdo->prepare($query);
             $stmt->bindValue(':long_url', $link->getLongUrl());
             $stmt->bindValue(':short_code', $link->getShortCode());
             $stmt->execute();
-            $this->pdo->commit();
+            $pdo->commit();
         } catch (\Exception $exception) {
-            $this->pdo->rollBack();
+            $pdo->rollBack();
             throw $exception;
         }
     }
 
     public function findByShortcode($shortcode)
     {
+        $pdo = $this->database->getPdo();
         try {
-            $stmt = $this->pdo->prepare("SELECT * FROM links WHERE shortcode = :shortcode");
+            $stmt = $pdo->prepare("SELECT * FROM links WHERE shortcode = :shortcode");
             $stmt->bindValue(':shortcode', $shortcode);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -52,8 +55,9 @@ class PdoLinkRepository implements LinkRepository
 
     public function getAll()
     {
+        $pdo = $this->database->getPdo();
         try {
-            $stmt = $this->pdo->prepare("SELECT * FROM links");
+            $stmt = $pdo->prepare("SELECT * FROM links");
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $links = [];
