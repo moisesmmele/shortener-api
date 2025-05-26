@@ -18,20 +18,20 @@ class MongoClickRepository implements ClickRepository
         $this->client = $database->getClient();
     }
 
-    public function save(Click $click)
+    public function save(Click $click): Click
     {
         $collection = $this->client->getCollection('links_db', 'clicks');
-        $collection->insertOne([
+        $result = $collection->insertOne([
             'link_id' => $click->getLinkId(),
             'utc_timestamp' => $click->getUtcTimestamp(),
             'source_ip' => $click->getSourceIp(),
             'referrer' => $click->getReferrer(),
             'flag' => $click->getFlag(),
         ]);
-
+        return $click;
     }
 
-    public function findByLink(Link $link)
+    public function findByLink(Link $link): array
     {
         $linkId = $link->getId();
         $collection = $this->client->getCollection('links_db', 'clicks');

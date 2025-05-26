@@ -13,9 +13,12 @@ class ResolveShortenedLinkUseCase
         $this->linkRepository = $linkRepository;
     }
 
-    public function execute(string $shortcode): LinkDto
+    public function execute(string $shortcode): LinkDto|null
     {
         $link = $this->linkRepository->findByShortcode($shortcode);
+        if (is_null($link)) {
+            return null;
+        }
         return LinkDto::fromEntity($link);
     }
 }

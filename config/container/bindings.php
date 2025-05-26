@@ -9,6 +9,7 @@ use Moises\ShortenerApi\Infrastructure\Repositories\Mongo\MongoClickRepository;
 use Moises\ShortenerApi\Infrastructure\Repositories\Pdo\PdoClickRepository;
 use Moises\ShortenerApi\Infrastructure\Repositories\Pdo\PdoLinkRepository;
 use Moises\ShortenerApi\Infrastructure\Router\LeagueRouterAdapter;
+use Moises\ShortenerApi\Infrastructure\Services\MongoLogger;
 use function DI\autowire;
 
 return array(
@@ -16,4 +17,5 @@ return array(
     UseCaseFactoryInterface::class => autowire(UseCaseFactory::class),
     LinkRepository::class => autowire(PdoLinkRepository::class),
     ClickRepository::class => autowire(MongoClickRepository::class),
+    \Psr\Log\LoggerInterface::class => autowire(MongoLogger::class),
 );

@@ -16,7 +16,7 @@ class PdoLinkRepository implements LinkRepository
         $this->database = $database;
     }
 
-    public function save(Link $link)
+    public function save(Link $link): Link
     {
         $pdo = $this->database->getPdo();
         try {
@@ -27,13 +27,16 @@ class PdoLinkRepository implements LinkRepository
             $stmt->bindValue(':short_code', $link->getShortCode());
             $stmt->execute();
             $pdo->commit();
+            $id = $pdo->lastInsertId();
+            $link->setId($id);
+            return $link;
         } catch (\Exception $exception) {
             $pdo->rollBack();
             throw $exception;
         }
     }
 
-    public function findByShortcode($shortcode)
+    public function findByShortcode($shortcode): ?Link
     {
         $pdo = $this->database->getPdo();
         try {
@@ -48,12 +51,13 @@ class PdoLinkRepository implements LinkRepository
                 $link->setShortCode($result['shortcode']);
                 return $link;
             }
+            return null;
         } catch (\Exception $exception) {
                 throw $exception;
         }
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         $pdo = $this->database->getPdo();
         try {

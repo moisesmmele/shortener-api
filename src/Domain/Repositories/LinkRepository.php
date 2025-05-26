@@ -6,7 +6,10 @@ use Moises\ShortenerApi\Domain\Entities\Link;
 
 interface LinkRepository
 {
-    public function save(Link $link);
-    public function findByShortcode($shortcode);
-    public function getAll();
+    public function save(Link $link): Link;
+
+    public function findByShortcode(string $shortcode): ?Link;
+
+    /** @return Link[] */
+    public function getAll(): array;
 }

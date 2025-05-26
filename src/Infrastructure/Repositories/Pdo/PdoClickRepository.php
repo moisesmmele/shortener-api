@@ -16,7 +16,7 @@ class PdoClickRepository implements ClickRepository
         $this->database = $database;
     }
 
-    public function save(Click $click)
+    public function save(Click $click): Click
     {
         $pdo = $this->database->getPdo();
         $pdo->beginTransaction();
@@ -29,14 +29,18 @@ class PdoClickRepository implements ClickRepository
             $stmt->bindValue(':source_ip', $click->getSourceIp());
             $stmt->bindValue(':referrer', $click->getReferrer());
             $stmt->execute();
+            $id = $pdo->lastInsertId();
             $pdo->commit();
+            $click->setId($id);
+            return $click;
         } catch (\Exception $exception) {
             $pdo->rollBack();
             throw $exception;
         }
     }
 
-    public function findByLink(Link $link)
+    /** @return Click[] */
+    public function findByLink(Link $link): array
     {
         try {
             $pdo = $this->database->getPdo();

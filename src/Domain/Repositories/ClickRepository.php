@@ -7,6 +7,8 @@ use Moises\ShortenerApi\Domain\Entities\Link;
 
 interface ClickRepository
 {
-    public function save(Click $click);
-    public function findByLink(Link $link);
+    public function save(Click $click): Click;
+
+    /** @return Click[] */
+    public function findByLink(Link $link): array;
 }

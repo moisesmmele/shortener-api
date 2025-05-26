@@ -12,7 +12,7 @@ class MongoAdapter implements DatabaseInterface
 
     public function __construct()
     {
-        $dsn = "mongodb://localhost:27017";
+        $dsn = "mongodb://172.16.99.86:27017";
         $this->client = new Client($dsn);
     }
 
