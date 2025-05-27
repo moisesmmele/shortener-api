@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Services;
 
@@ -67,7 +67,7 @@ class MongoLogger implements LoggerInterface
         ];
         try {
             $client = $this->database->getClient();
-            $collection = $client->getCollection('links', 'logs');
+            $collection = $client->getCollection($_ENV['DB_NAME'], 'logs');
             $collection->insertOne($data);
         } catch (\Exception $e) {
             error_log('CRITICAL: Logger could not connect to database. No logs are being persisted.');

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Controllers;
 
@@ -31,30 +31,34 @@ class ClickController
                 'uri' => (string) $request->getUri(),
             ],
         ];
+
         try {
             /** @var ResolveShortenedLinkUseCase $resolveShortenedLinkUseCase */
-            $resolveShortenedLinkUseCase = $this->useCaseFactory->create(ResolveShortenedLinkUseCase::class);
+            $resolveShortenedLinkUseCase = $this->useCaseFactory
+                ->create(ResolveShortenedLinkUseCase::class);
 
             /** @var RegisterNewClickUseCase $registerNewClickUseCase */
-            $registerNewClickUseCase = $this->useCaseFactory->create(RegisterNewClickUseCase::class);
+            $registerNewClickUseCase = $this->useCaseFactory
+                ->create(RegisterNewClickUseCase::class);
 
             $shortcode = str_replace('/', '', $request->getUri()->getPath());
             $sourceAddress = $request->getServerParams()['REMOTE_ADDR'];
             $referrerAddress = $request->getHeaderLine('Referer');
 
-            $linkDto = $resolveShortenedLinkUseCase
-                ->execute(shortcode: $shortcode);
+            $linkDto = $resolveShortenedLinkUseCase->execute($shortcode);
 
             if (is_null($linkDto)) {
                 $logContext['link_info'] = [
                     'shortcode' => $shortcode,
                 ];
-                $this->logger->info('Could not resolve shortened link', $logContext);
-                return new TextResponse('Could not resolve this link.', 404);
+
+                $message = 'Could not resolve shortened link (not found)';
+                $this->logger->info($message, $logContext);
+                return new TextResponse('404 Not found.', 404);
             }
 
             $registerNewClickUseCase
-                ->execute(linkDto: $linkDto, sourceAddress: $sourceAddress, referrerAddress: $referrerAddress);
+                ->execute($linkDto, $sourceAddress, $referrerAddress);
 
             $this->logger->info('link resolved.', $logContext);
             return new RedirectResponse($linkDto->getLongUrl());
@@ -66,6 +70,7 @@ class ClickController
                 'code' => $exception->getCode(),
                 'trace' => $exception->getTrace(),
             ];
+
             $this->logger->critical('Could not resolve link.', $logContext);
             return new TextResponse('Bad Server Request', 500);
         }

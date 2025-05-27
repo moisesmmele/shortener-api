@@ -1,8 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Mongo;
 
-use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 use Moises\ShortenerApi\Domain\Entities\Click;
 use Moises\ShortenerApi\Domain\Entities\Link;
@@ -20,7 +19,8 @@ class MongoClickRepository implements ClickRepository
 
     public function save(Click $click): Click
     {
-        $collection = $this->client->getCollection('links_db', 'clicks');
+
+        $collection = $this->client->getCollection($_ENV['DB_NAME'], 'clicks');
         $result = $collection->insertOne([
             'link_id' => $click->getLinkId(),
             'utc_timestamp' => $click->getUtcTimestamp(),
@@ -31,10 +31,11 @@ class MongoClickRepository implements ClickRepository
         return $click;
     }
 
+    /** @return Click[] */
     public function findByLink(Link $link): array
     {
         $linkId = $link->getId();
-        $collection = $this->client->getCollection('links_db', 'clicks');
+        $collection = $this->client->getCollection($_ENV['DB_NAME'], 'clicks');
         $clicks = $collection->find(['link_id' => $linkId]);
         $clicksObj = [];
         foreach ($clicks as $click) {

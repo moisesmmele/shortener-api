@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
@@ -16,7 +16,7 @@ class RegisterNewLinkUseCase
         $this->shortenerService = $shortenerService;
     }
 
-    public function execute(String $url): LinkDto
+    public function execute(String $url): ?LinkDto
     {
         $link = $this->shortenerService->generateShortLink($url);
         $this->linkRepository->save($link);

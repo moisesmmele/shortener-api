@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Router;
 
@@ -78,26 +78,26 @@ class LeagueRouterAdapter implements RouterInterface
 
     public function post(string $uri, callable|array|string $handler): void
     {
-        // TODO: Implement post() method.
+        $this->router->map('POST', $uri, $handler);
     }
 
     public function put(string $uri, callable|array|string $handler): void
     {
-        // TODO: Implement put() method.
+        $this->router->map('PUT', $uri, $handler);
     }
 
     public function patch(string $uri, callable|array|string $handler): void
     {
-        // TODO: Implement patch() method.
+        $this->router->map('PATCH', $uri, $handler);
     }
 
     public function delete(string $uri, callable|array|string $handler): void
     {
-        // TODO: Implement delete() method.
+        $this->router->map('DELETE', $uri, $handler);
     }
 
     public function options(string $uri, callable|array|string $handler): void
     {
-        // TODO: Implement options() method.
+        $this->router->map('OPTIONS', $uri, $handler);
     }
 }

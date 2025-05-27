@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
@@ -13,7 +13,7 @@ class ResolveShortenedLinkUseCase
         $this->linkRepository = $linkRepository;
     }
 
-    public function execute(string $shortcode): LinkDto|null
+    public function execute(string $shortcode): ?LinkDto
     {
         $link = $this->linkRepository->findByShortcode($shortcode);
         if (is_null($link)) {

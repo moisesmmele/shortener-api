@@ -13,7 +13,6 @@ return function (RouterInterface $router) {
             'status' => 'OK',
             'message' => 'Hello World!',
             'php_version' => phpversion(),
-            'request_data' => $request->getServerParams(),
         ]);
     });
 

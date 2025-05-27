@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Bootstrap;
 
@@ -6,15 +6,15 @@ use DI\Container;
 use DI\ContainerBuilder;
 use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
 use Moises\ShortenerApi\Infrastructure\App;
+use Dotenv\Dotenv;
 
 class AppFactory
 {
     public static function create(): App
     {
-
+        self::loadEnv();
         $container = self::container();
         $router = $container->get(RouterInterface::class);
-
         return new App($router);
     }
     private static function container(): Container
@@ -25,6 +25,7 @@ class AppFactory
     }
     private static function loadEnv(): void
     {
-
+        $dotenv = Dotenv::createImmutable(BASE_PATH . '/config/');
+        $dotenv->safeload();
     }
 }

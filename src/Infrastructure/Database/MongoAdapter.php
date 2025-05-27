@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Database;
 
@@ -12,8 +12,16 @@ class MongoAdapter implements DatabaseInterface
 
     public function __construct()
     {
-        $dsn = "mongodb://172.16.99.86:27017";
-        $this->client = new Client($dsn);
+        $conn_url = "{$_ENV['DB_DRIVER']}://{$_ENV['DB_HOST']}:{$_ENV['DB_PORT']}";
+        if (isset($_ENV['DB_USE_PASSWORD'])) {
+            $credentials = [
+                'username' => $_ENV['DB_USER'],
+                'password' => $_ENV['DB_PASSWORD']
+            ];
+            $this->client = new Client($conn_url, $credentials);
+        } else {
+            $this->client = new Client($conn_url);
+        }
     }
 
     public function getClient(): Client

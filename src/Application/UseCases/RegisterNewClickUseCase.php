@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
@@ -16,7 +16,7 @@ class RegisterNewClickUseCase
         $this->clickRepository = $clickRepository;
         $this->trackerService = $trackerService;
     }
-    public function execute(LinkDto $linkDto, string $sourceAddress, string $referrerAddress)
+    public function execute(LinkDto $linkDto, string $sourceAddress, string $referrerAddress): void
     {
         $link = new Link();
         $link->setId($linkDto->getId());

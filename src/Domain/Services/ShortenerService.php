@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Domain\Services;
 
@@ -10,7 +10,7 @@ class ShortenerService
     {
         $link = new Link();
         $link->setLongUrl($longUrl);
-        $link->setShortcode($this->generateShortcode(8));
+        $link->setShortcode($this->generateShortcode(6));
 
         return $link;
     }
