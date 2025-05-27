@@ -1,5 +1,6 @@
 # URL Shortener and Tracker API
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/moisesmmele/shortener-api)
 Lightweight PHP service for creating and tracking short URLs. Implements (my interpretation of) Clean Architecture with strict layering and PSR compliance.
 
 ## Features
