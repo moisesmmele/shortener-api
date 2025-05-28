@@ -2,15 +2,15 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Controllers;
 
-use Laminas\Diactoros\Response\JsonResponse;
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewLinkUseCase;
 use Psr\Http\Message\ServerRequestInterface;
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Log\LoggerInterface;
 
 class LinkController
 {
-    private $useCaseFactory;
+    private UseCaseFactoryInterface $useCaseFactory;
     private LoggerInterface $logger;
 
     public function __construct(UseCaseFactoryInterface $useCaseFactory, LoggerInterface $logger)

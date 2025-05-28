@@ -2,10 +2,10 @@
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
+use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
+use Moises\ShortenerApi\Domain\Services\TrackerService;
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
 use Moises\ShortenerApi\Domain\Entities\Link;
-use Moises\ShortenerApi\Domain\Services\TrackerService;
-use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 
 class RegisterNewClickUseCase
 {

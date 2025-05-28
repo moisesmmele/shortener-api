@@ -2,9 +2,9 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Mongo;
 
+use Moises\ShortenerApi\Infrastructure\Database\MongoAdapter;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
 use Moises\ShortenerApi\Domain\Entities\Link;
-use Moises\ShortenerApi\Infrastructure\Database\MongoAdapter;
 use MongoDB\Client;
 
 class MongoLinkRepository implements LinkRepository

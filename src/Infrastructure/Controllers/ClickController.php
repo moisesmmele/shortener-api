@@ -2,13 +2,13 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Controllers;
 
-use Laminas\Diactoros\Response\RedirectResponse;
-use Laminas\Diactoros\Response\TextResponse;
+use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewClickUseCase;
-use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
-use Psr\Http\Message\RequestInterface;
+use Laminas\Diactoros\Response\RedirectResponse;
+use Laminas\Diactoros\Response\TextResponse;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 
 class ClickController

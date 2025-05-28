@@ -2,17 +2,16 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Router;
 
-use DI\Container;
+use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
+use League\Route\Http\Exception\NotFoundException;
+use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
+use League\Route\Strategy\ApplicationStrategy;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
-use League\Route\Http\Exception\NotFoundException;
-use League\Route\Router;
-use League\Route\Strategy\ApplicationStrategy;
-use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use function DI\string;
+use League\Route\Router;
+use DI\Container;
 
 class LeagueRouterAdapter implements RouterInterface
 {

@@ -2,10 +2,10 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Mongo;
 
+use Moises\ShortenerApi\Infrastructure\Database\MongoAdapter;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 use Moises\ShortenerApi\Domain\Entities\Click;
 use Moises\ShortenerApi\Domain\Entities\Link;
-use Moises\ShortenerApi\Infrastructure\Database\MongoAdapter;
 use MongoDB\Client;
 
 class MongoClickRepository implements ClickRepository

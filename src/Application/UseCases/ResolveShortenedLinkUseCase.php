@@ -2,8 +2,8 @@
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
-use Moises\ShortenerApi\Application\Dtos\LinkDto;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
+use Moises\ShortenerApi\Application\Dtos\LinkDto;
 
 class ResolveShortenedLinkUseCase
 {

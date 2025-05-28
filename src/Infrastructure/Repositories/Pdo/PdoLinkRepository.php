@@ -2,10 +2,10 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Pdo;
 
-use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
-use Moises\ShortenerApi\Domain\Entities\Link;
-use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
 use Moises\ShortenerApi\Infrastructure\Database\SqlitePdoAdapter;
+use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
+use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
+use Moises\ShortenerApi\Domain\Entities\Link;
 use PDO;
 
 class PdoLinkRepository implements LinkRepository

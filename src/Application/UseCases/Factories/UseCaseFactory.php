@@ -2,8 +2,8 @@
 
 namespace Moises\ShortenerApi\Application\UseCases\Factories;
 
-use Psr\Container\ContainerInterface;
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class UseCaseFactory implements UseCaseFactoryInterface
 {

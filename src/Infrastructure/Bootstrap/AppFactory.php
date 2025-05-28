@@ -2,11 +2,11 @@
 
 namespace Moises\ShortenerApi\Infrastructure\Bootstrap;
 
-use DI\Container;
-use DI\ContainerBuilder;
 use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
 use Moises\ShortenerApi\Infrastructure\App;
+use DI\ContainerBuilder;
 use Dotenv\Dotenv;
+use DI\Container;
 
 class AppFactory
 {
