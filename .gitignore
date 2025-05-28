@@ -2,3 +2,4 @@
 /database/database.sqlite
 /config/.env
 .idea/
+/.php-cs-fixer.cache

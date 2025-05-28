@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Router;
 
@@ -66,7 +68,7 @@ class LeagueRouterAdapter implements RouterInterface
                 'exception' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString(),
             ];
-            $this->logger->critical('could not load routes.');
+            $this->logger->critical('could not load routes.', $logContext);
         }
     }
 

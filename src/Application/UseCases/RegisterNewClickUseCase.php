@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
@@ -11,7 +13,7 @@ class RegisterNewClickUseCase
 {
     private TrackerService $trackerService;
     private ClickRepository $clickRepository;
-    public function __construct( TrackerService $trackerService, ClickRepository $clickRepository)
+    public function __construct(TrackerService $trackerService, ClickRepository $clickRepository)
     {
         $this->clickRepository = $clickRepository;
         $this->trackerService = $trackerService;

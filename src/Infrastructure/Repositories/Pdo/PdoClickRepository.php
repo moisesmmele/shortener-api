@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Pdo;
 
@@ -31,7 +33,7 @@ class PdoClickRepository implements ClickRepository
             $stmt->execute();
             $id = $pdo->lastInsertId();
             $pdo->commit();
-            $click->setId($id);
+            $click->setId((int) $id);
             return $click;
         } catch (\Exception $exception) {
             $pdo->rollBack();

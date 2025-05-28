@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Database;
-
 
 use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
 use MongoDB\Client;

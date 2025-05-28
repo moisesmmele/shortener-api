@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Domain\Entities;
 
@@ -38,7 +40,7 @@ class Click
 
     public function setUtcTimestamp(string $timestamp): void
     {
-        if(!preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', $timestamp)) {
+        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', $timestamp)) {
             throw new \Exception("Invalid timestamp format. Should be YYYY-MM-DD HH:MM:SS");
         }
         $this->utcTimestamp = $timestamp;
@@ -55,7 +57,7 @@ class Click
 
     public function setSourceIp(string $sourceIp): void
     {
-        if(!preg_match('^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$^', $sourceIp)) {
+        if (!preg_match('^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$^', $sourceIp)) {
             throw new \Exception("Invalid ip address");
         }
         $this->sourceIp = $sourceIp;

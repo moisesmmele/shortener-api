@@ -1,8 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\Contracts\Router;
 
 use Psr\Http\Message\ResponseInterface;
+
 interface RouterInterface
 {
     public function dispatch(): ResponseInterface;

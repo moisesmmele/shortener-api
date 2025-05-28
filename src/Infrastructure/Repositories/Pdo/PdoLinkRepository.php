@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Pdo;
 
@@ -28,7 +30,7 @@ class PdoLinkRepository implements LinkRepository
             $stmt->execute();
             $pdo->commit();
             $id = $pdo->lastInsertId();
-            $link->setId($id);
+            $link->setId((int) $id);
             return $link;
         } catch (\Exception $exception) {
             $pdo->rollBack();
@@ -53,7 +55,7 @@ class PdoLinkRepository implements LinkRepository
             }
             return null;
         } catch (\Exception $exception) {
-                throw $exception;
+            throw $exception;
         }
     }
 
