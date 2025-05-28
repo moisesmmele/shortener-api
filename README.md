@@ -7,6 +7,8 @@ Lightweight PHP service for creating and tracking short URLs. Implements (my int
 
 #### OBS: This is not a real project. For studying purposes only. Definitely not production code.
 
+
+For better project understanding, please check the AI-generated documentation:  
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/moisesmmele/shortener-api)
 
 ## Features
