@@ -91,9 +91,9 @@ GET /{code}
 * 500 Internal Server Error for unhandled exceptions
 * Errors logged via PSR-3 logger (Using MongoDB documents) 
 
-## Technology Stack
+## Technology Stack and Dependencies
 
-* PHP 8.0+
+* PHP 8.0+ and MongoDB
 * league/route, laminas-diactoros, laminas-httphandlerrunner
 * php-di/php-di, mongodb/mongodb, vlucas/phpdotenv
 * symfony/var-dumper, phpstan/phpstan
