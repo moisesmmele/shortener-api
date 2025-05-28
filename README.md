@@ -3,13 +3,11 @@
 ![PHP](https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
 
-
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/moisesmmele/shortener-api)
-
-
 Lightweight PHP service for creating and tracking short URLs. Implements (my interpretation of) Clean Architecture with strict layering and PSR compliance.
 
 #### OBS: This is not a real project. For studying purposes only. Definitely not production code.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/moisesmmele/shortener-api)
 
 ## Features
 
