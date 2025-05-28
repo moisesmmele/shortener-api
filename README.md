@@ -29,24 +29,26 @@ Lightweight PHP service for creating and tracking short URLs. Implements (my int
 
    * Controllers handle HTTP requests/responses
    * Routing via League Route adapter
-   * Persistence through PDO or MongoDB repositories
-   * Logging via PSR-3 compliant logger
+   * Persistence through PDO or MongoDB repositories (defaults to MongoDB)
+   * Logging via PSR-3 compliant logger, using MongoDB documents for some observability
 
-### Design Patterns
+### Design Patterns and Best Practices
 
 * **Repository Pattern**: Abstracts data access, supports multiple backends
 * **Adapter Pattern**: Integrates third‑party routing library behind a uniform interface
 * **Factory Pattern**: Centralizes use case instantiation
-* **DTOs**: Immutable data transfer objects between layers
 * **Strategy Pattern**: Defines routing behavior for different endpoints
+  
 * **Dependency Injection**: Constructor injection throughout, container built with PHP‑DI
+* **Decoupled Code**: Use of Contracts throughout the Application Layer 
+* **DTOs**: Immutable data transfer objects between layers
 
 ### PSR Compliance
 
 * **PSR-4**: Namespace autoloading
-* **PSR-7**: HTTP message interfaces via Laminas Diactoros
-* **PSR-11**: Container interface via PHP‑DI
-* **PSR-3**: Logging interface for error and event reporting
+* **PSR-7**: HTTP message interfaces
+* **PSR-11**: Container interfaces
+* **PSR-3**: Logging interfaces
 
 ## API Endpoints
 
@@ -79,7 +81,7 @@ GET /{code}
 * 400 Bad Request for invalid inputs
 * 404 Not Found for missing resources
 * 500 Internal Server Error for unhandled exceptions
-* Errors logged via PSR-3 logger
+* Errors logged via PSR-3 logger (Using MongoDB documents) 
 
 ## Technology Stack
 
