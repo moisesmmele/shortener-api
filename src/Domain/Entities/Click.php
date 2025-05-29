@@ -41,7 +41,7 @@ class Click
     public function setUtcTimestamp(string $timestamp): void
     {
         if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', $timestamp)) {
-            throw new \Exception("Invalid timestamp format. Should be YYYY-MM-DD HH:MM:SS");
+            throw new \DomainException("Invalid timestamp format. Should be YYYY-MM-DD HH:MM:SS");
         }
         $this->utcTimestamp = $timestamp;
     }

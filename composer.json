@@ -4,7 +4,8 @@
     "type": "project",
     "autoload": {
         "psr-4": {
-            "Moises\\ShortenerApi\\": "src/"
+            "Moises\\ShortenerApi\\": "src/",
+            "Moises\\ShortenerApi\\Tests\\": "tests/"
         }
     },
     "authors": [
@@ -28,6 +29,7 @@
     "require-dev": {
         "symfony/var-dumper": "^7.2",
         "phpstan/phpstan": "^2.1",
-        "friendsofphp/php-cs-fixer": "^3.75"
+        "friendsofphp/php-cs-fixer": "^3.75",
+        "phpunit/phpunit": "^12.1"
     }
 }

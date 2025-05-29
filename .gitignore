@@ -3,3 +3,4 @@
 /config/.env
 .idea/
 /.php-cs-fixer.cache
+/.phpunit.cache/

@@ -1,0 +1,4 @@
+Click (Moises\ShortenerApi\Tests\Domain\Click)
+ [x] SetUtcTimestamp accepts valid format
+ [x] SetUtcTimestamp throws exception when invalid format
+
