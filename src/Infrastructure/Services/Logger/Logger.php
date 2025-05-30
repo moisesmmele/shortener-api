@@ -41,12 +41,36 @@ class Logger implements LoggerInterface
 
     public function log($level, \Stringable|string $message, array $context = []): void
     {
-        error_log("[$level]: $message");
-        $this->lastLog = new Log($level, $message, $context);
+        $this->lastLog = new Log($level, $this->interpolate($message, $context), $context);
+        $this->printLastLog();
     }
 
     public function getLastLog(): Log
     {
         return $this->lastLog;
+    }
+
+    public function printLastLog(): void
+    {
+        if (!$this->lastLog) {
+            throw new \Exception('No log object was specified.');
+        }
+        $level = $this->lastLog->getLevel();
+        $message = $this->lastLog->getMessage();
+        error_log("[$level]: $message");
+    }
+    private function interpolate(string|\Stringable $message, array $context = []): string
+    {
+        $replace = [];
+        foreach ($context as $key => $val) {
+            if (is_null($val) || is_scalar($val) || $val instanceof \Stringable) {
+                $replace['{' . $key . '}'] = (string) $val;
+            } elseif (is_object($val)) {
+                $replace['{' . $key . '}'] = '[object ' . get_class($val) . ']';
+            } else {
+                $replace['{' . $key . '}'] = '[' . gettype($val) . ']';
+            }
+        }
+        return strtr($message, $replace);
     }
 }

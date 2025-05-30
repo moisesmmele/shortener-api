@@ -71,13 +71,21 @@ class ClickController
 
         } catch (\Throwable $exception) {
 
+            $message = $exception->getMessage();
+            $code = $exception->getCode();
+            $trace = $exception->getTrace();
+            $traceString = $exception->getTraceAsString();
+
             $logContext['exception'] = [
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode(),
-                'trace' => $exception->getTrace(),
+                'message' => $message,
+                'code' => $code,
+                'trace' => $trace,
             ];
 
-            $this->logger->critical("[$method] [$path] 500 Internal Server Error", $logContext);
+            $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
+            if (APP_DEBUG) {
+                error_log('stacktrace: ' . PHP_EOL . $traceString);
+            }
             return new TextResponse('500 Internal Server Error', 500);
         }
     }

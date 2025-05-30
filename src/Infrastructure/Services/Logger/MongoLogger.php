@@ -63,7 +63,7 @@ class MongoLogger implements LoggerInterface
 
     public function log($level, \Stringable|string $message, array $context = []): void
     {
-        $this->logger->log($level, $this->interpolate($message, $context), $context);
+        $this->logger->log($level, $message, $context);
         $log = $this->logger->getLastLog();
 
         $data = [
@@ -79,24 +79,9 @@ class MongoLogger implements LoggerInterface
             $collection = $client->getCollection($_ENV['DB_NAME'], 'logs');
             $collection->insertOne($data);
         } catch (\Exception $e) {
-            error_log('CRITICAL: Logger could not connect to database. No logs are being persisted.');
-            error_log(PHP_EOL . 'message: ' . $e->getMessage());
-            error_log(PHP_EOL . 'trace: ' . $e->getTraceAsString());
+            error_log('[warning]: Logger could not connect to database. No logs are being persisted.');
+            error_log('message: ' . $e->getMessage());
+            #error_log('stacktrace: '. PHP_EOL . $e->getTraceAsString());
         }
     }
-    private function interpolate(string|\Stringable $message, array $context = []): string
-    {
-        $replace = [];
-        foreach ($context as $key => $val) {
-            if (is_null($val) || is_scalar($val) || $val instanceof \Stringable) {
-                $replace['{' . $key . '}'] = (string) $val;
-            } elseif (is_object($val)) {
-                $replace['{' . $key . '}'] = '[object ' . get_class($val) . ']';
-            } else {
-                $replace['{' . $key . '}'] = '[' . gettype($val) . ']';
-            }
-        }
-        return strtr($message, $replace);
-    }
-
 }

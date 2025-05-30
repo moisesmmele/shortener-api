@@ -15,6 +15,7 @@ class AppFactory
     public static function create(): App
     {
         self::loadEnv();
+        self::setDebugMode();
         $container = self::container();
         $router = $container->get(RouterInterface::class);
         return new App($router);
@@ -29,5 +30,10 @@ class AppFactory
     {
         $dotenv = Dotenv::createImmutable(BASE_PATH . '/config/');
         $dotenv->safeload();
+    }
+
+    private static function setDebugMode(): void
+    {
+        define('APP_DEBUG', (bool) $_ENV['APP_DEBUG']);
     }
 }
