@@ -35,19 +35,20 @@ class LeagueRouterAdapter implements RouterInterface
         $request = ServerRequestFactory::fromGlobals();
         $method = $request->getMethod();
         $uri = $request->getUri();
+        $path = $uri->getPath();
         $logContext = [
             'class' => get_class($this),
             'method' => __METHOD__,
             'request' => [
                 'method' => $method,
-                'uri' => (string) $uri,
+                'path' => $path,
             ]
         ];
         try {
-            $this->logger->info('resolved new request', $logContext);
+            $this->logger->info("New Request [$method] [$path]", $logContext);
             $response = $this->router->dispatch($request);
         } catch (NotFoundException $exception) {
-            $this->logger->info('request to unregistered route', $logContext);
+            $this->logger->info("[$method] [$path] 404 Not Found", $logContext);
             $response = new JsonResponse(['statusCode' => '404', 'message' => '404 Not Found'], 404);
         }
         return $response;

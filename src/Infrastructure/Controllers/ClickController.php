@@ -25,12 +25,16 @@ class ClickController
     }
     public function click(RequestInterface $request): ResponseInterface
     {
+        $method = $request->getMethod();
+        $uri = $request->getUri();
+        $path = $uri->getPath();
+
         $logContext = [
             "class" => get_class($this),
             "class_method" => __METHOD__,
             "request" => [
-                'method' => $request->getMethod(),
-                'uri' => (string) $request->getUri(),
+                'method' => $method,
+                'path' => $path,
             ],
         ];
 
@@ -54,7 +58,7 @@ class ClickController
                     'shortcode' => $shortcode,
                 ];
 
-                $message = 'Could not resolve shortened link (not found)';
+                $message = "[$method] [$path] 404 Not Found";
                 $this->logger->info($message, $logContext);
                 return new TextResponse('404 Not found.', 404);
             }
@@ -62,7 +66,7 @@ class ClickController
             $registerNewClickUseCase
                 ->execute($linkDto, $sourceAddress, $referrerAddress);
 
-            $this->logger->info('link resolved.', $logContext);
+            $this->logger->info("[$method] [$path] 200 OK", $logContext);
             return new RedirectResponse($linkDto->getLongUrl());
 
         } catch (\Throwable $exception) {
@@ -73,8 +77,8 @@ class ClickController
                 'trace' => $exception->getTrace(),
             ];
 
-            $this->logger->critical('Could not resolve link.', $logContext);
-            return new TextResponse('Bad Server Request', 500);
+            $this->logger->critical("[$method] [$path] 500 Internal Server Error", $logContext);
+            return new TextResponse('500 Internal Server Error', 500);
         }
     }
 }

@@ -8,7 +8,7 @@ use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
 use Moises\ShortenerApi\Infrastructure\Repositories\Mongo\MongoClickRepository;
 use Moises\ShortenerApi\Infrastructure\Repositories\Mongo\MongoLinkRepository;
 use Moises\ShortenerApi\Infrastructure\Router\LeagueRouterAdapter;
-use Moises\ShortenerApi\Infrastructure\Services\MongoLogger;
+use Moises\ShortenerApi\Infrastructure\Services\Logger\MongoLogger;
 use Psr\Log\LoggerInterface;
 use function DI\autowire;
 

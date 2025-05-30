@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Moises\ShortenerApi\Infrastructure\Services;
+namespace Moises\ShortenerApi\Infrastructure\Services\Logger;
 
 use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
 use Moises\ShortenerApi\Infrastructure\Database\MongoAdapter;
@@ -13,10 +13,12 @@ use Psr\Log\LogLevel;
 class MongoLogger implements LoggerInterface
 {
     private DatabaseInterface $database;
+    private Logger $logger;
 
-    public function __construct(MongoAdapter $mongoAdapter)
+    public function __construct(MongoAdapter $mongoAdapter, Logger $logger)
     {
         $this->database = $mongoAdapter;
+        $this->logger = $logger;
     }
 
     public function emergency(\Stringable|string $message, array $context = []): void
@@ -61,23 +63,28 @@ class MongoLogger implements LoggerInterface
 
     public function log($level, \Stringable|string $message, array $context = []): void
     {
+        $this->logger->log($level, $this->interpolate($message, $context), $context);
+        $log = $this->logger->getLastLog();
+
         $data = [
             'utc_timestamp' => new UTCDateTime(),
-            'level' => $level,
-            'message' => $this->interpolate($message, $context),
-            'context' => $context,
+            'level' => $log->getLevel(),
+            'message' => $log->getMessage(),
+            'context' => $log->getContext(),
         ];
+
+
         try {
             $client = $this->database->getClient();
             $collection = $client->getCollection($_ENV['DB_NAME'], 'logs');
             $collection->insertOne($data);
         } catch (\Exception $e) {
             error_log('CRITICAL: Logger could not connect to database. No logs are being persisted.');
-            error_log("stacktrace:" . PHP_EOL . $e->getTraceAsString());
-            error_log("last log:" . PHP_EOL . implode(", ", $data));
+            error_log(PHP_EOL . 'message: ' . $e->getMessage());
+            error_log(PHP_EOL . 'trace: ' . $e->getTraceAsString());
         }
     }
-    private function interpolate(string $message, array $context = []): string
+    private function interpolate(string|\Stringable $message, array $context = []): string
     {
         $replace = [];
         foreach ($context as $key => $val) {

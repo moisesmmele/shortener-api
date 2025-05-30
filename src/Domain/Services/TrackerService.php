@@ -15,9 +15,8 @@ class TrackerService
         $click->setLinkId($link->getId());
         $click->setSourceIp($sourceAddress);
         $click->setReferrer($referrerAddress);
-        $click->generateUtcTimestamp(); // Entity method
+        $click->generateUtcTimestamp();
 
-        // Additional domain logic example:
         if ($this->isSuspiciousClick($click)) {
             //TODO: implement REAL business logic inside the TrackerService;
             // This is here just so it can actually be considered a service
