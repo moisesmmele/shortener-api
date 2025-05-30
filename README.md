@@ -58,6 +58,11 @@ For better project understanding, please check the AI-generated documentation:
 * **PSR-11**: Container interfaces
 * **PSR-3**: Logging interfaces
 
+### Tests with PHPUnit
+
+* **Unit Tests**: Unit Tests for Domain Entities
+
+
 ## API Endpoints
 
 ### Create Short Link
