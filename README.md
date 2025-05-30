@@ -44,8 +44,8 @@ For better project understanding, please check the AI-generated documentation:
 
 * **Repository Pattern**: Abstracts data access, supports multiple backends
 * **Adapter Pattern**: Integrates third‑party routing library behind a uniform interface
-* **Factory Pattern**: Centralizes use case instantiation
-* **Strategy Pattern**: Defines routing behavior for different endpoints
+* **Factory Pattern**: Centralizes use case instantiation, using Container without passing it as a Controller Constructor Parameter
+* **Decorator Pattern**: MongoLogger "extends" Logger functionality (adding persistence)
   
 * **Dependency Injection**: Constructor injection throughout, container built with PHP‑DI
 * **Decoupled Code**: Use of Contracts throughout the Application Layer 
