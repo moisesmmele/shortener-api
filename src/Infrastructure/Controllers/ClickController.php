@@ -30,7 +30,6 @@ class ClickController
         $path = $uri->getPath();
 
         $logContext = [
-            "class" => get_class($this),
             "class_method" => __METHOD__,
             "request" => [
                 'method' => $method,
@@ -47,7 +46,7 @@ class ClickController
             $registerNewClickUseCase = $this->useCaseFactory
                 ->create(RegisterNewClickUseCase::class);
 
-            $shortcode = str_replace('/', '', $request->getUri()->getPath());
+            $shortcode = str_replace('/', '', $path);
             $sourceAddress = $request->getServerParams()['REMOTE_ADDR'];
             $referrerAddress = $request->getHeaderLine('Referer');
 
@@ -59,7 +58,7 @@ class ClickController
                 ];
 
                 $message = "[$method] [$path] 404 Not Found";
-                $this->logger->info($message, $logContext);
+                $this->logger->info($message, $logContext[] = ['outcome' => 'resolved, but link not found']);
                 return new TextResponse('404 Not found.', 404);
             }
 
@@ -82,7 +81,8 @@ class ClickController
                 'trace' => $trace,
             ];
 
-            $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
+            $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext[] =
+            ['outcome' => 'unable to resolve due to internal server error']);
             if (APP_DEBUG) {
                 error_log('stacktrace: ' . PHP_EOL . $traceString);
             }

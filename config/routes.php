@@ -4,11 +4,20 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
 use Moises\ShortenerApi\Infrastructure\Controllers\ClickController;
 use Moises\ShortenerApi\Infrastructure\Controllers\LinkController;
-use Moises\ShortenerApi\Infrastructure\Controllers\TestController;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 return function (RouterInterface $router) {
     $router->get('/', function (Request $request) {
+        $path = $request->getUri()->getPath();
+        $method = $request->getMethod();
+        $logContext = [
+            'class_method' => __METHOD__,
+            'request' => [
+                'method' => $method,
+                'path' => $path,
+            ]
+        ];
+        $this->logger->info("[$method] [$path] 200 OK", $logContext);
         return new JsonResponse([
             'status' => 'OK',
             'message' => 'Hello World!',

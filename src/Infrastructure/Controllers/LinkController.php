@@ -6,6 +6,7 @@ namespace Moises\ShortenerApi\Infrastructure\Controllers;
 
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewLinkUseCase;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Log\LoggerInterface;
@@ -21,38 +22,50 @@ class LinkController
         $this->logger = $logger;
     }
 
-    public function create(ServerRequestInterface $request): JsonResponse
+    public function create(ServerRequestInterface $request): ResponseInterface
     {
+        //get basic request info
+        $method = $request->getMethod();
+        $uri = $request->getUri();
+        $path = $uri->getPath();
+
+        //initiate logContext array with basic info
         $logContext = [
-            "class" => get_class($this),
             "class_method" => __METHOD__,
             'request' => [
-                'method' => $request->getMethod(),
-                'uri' => (string) $request->getUri(),
+                'method' => $method,
+                'path' => $path,
             ]
         ];
 
         try {
+            //get the appropriate UseCase
             /** @var RegisterNewLinkUseCase $registerNewLinkUseCase */
             $registerNewLinkUseCase = $this->useCaseFactory
                 ->create(RegisterNewLinkUseCase::class);
 
+            //get aditional request info
             $body = $request->getBody();
             $contents = $body->getContents();
+            //decode json request to assoc array
             $data = json_decode($contents, associative: true);
 
+            //checks if a url was provided, if not, return Bad Request
             $url = $data['url'];
             if (!$url) {
-                $logContext['outcome'] = 'failure';
+                //add outcome to logContext array
+                $logContext['outcome'] = 'resolved, but no URL was provided for registration';
                 $this->logger->info('user provided no URL for registration', $logContext);
                 return new JsonResponse([
-                   'message' => 'No url provided'
-                ], 422);
+                   'message' => 'Bad Request',
+                    'details' => 'No URL was provided for registration',
+                ], 400);
             }
 
+            //execute de UseCase with collected request data
             $linkDto = $registerNewLinkUseCase->execute($url);
             $responseBody = [
-                'message' => 'success',
+                'message' => 'OK',
                 'link' => [
                     'id' => $linkDto->getId(),
                     'url' => $linkDto->getLongUrl(),
@@ -60,20 +73,49 @@ class LinkController
                 ]
             ];
 
-            $this->logger->info('created a new link.', $logContext);
-            return new JsonResponse($responseBody);
+            $this->logger->info("[$method] [$path] 201 Created", $logContext);
+            //returns Created Response
+            return new JsonResponse($responseBody, 201);
 
-        } catch (\Throwable $exception) {
+            //catch domain Exceptions (probably Bad Requests)
+        } catch (\DomainException $domainException) {
 
-            $logContext['outcome'] = 'exception';
+            $message =  $domainException->getMessage();
+            $code = $domainException->getCode();
+            $trace  = $domainException->getTrace();
+
+            $logContext['outcome'] = 'Domain Exception';
             $logContext['exception'] = [
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode(),
-                'trace' => $exception->getTrace(),
+                'message' => $message,
+                'code' => $code,
+                'trace' => $trace,
             ];
 
-            $this->logger->critical('Could not register link', $logContext);
-            return new JsonResponse(['message' => 'Bad Server Request'], 500);
+            $responseBody = [
+                'message' => 'Bad Request',
+                'details' => "$message",
+            ];
+            $this->logger->critical("[$method] [$path] 400 Bad Request ($message)", $logContext);
+            return new JsonResponse($responseBody, 400);
+            //catch other exceptions (probably 500s Internal server Error)
+        }  catch (\Exception $exception) {
+            $message =  $exception->getMessage();
+            $code = $exception->getCode();
+            $trace  = $exception->getTrace();
+
+            $logContext['outcome'] = 'Exception';
+            $logContext['exception'] = [
+                'message' => $message,
+                'code' => $code,
+                'trace' => $trace,
+            ];
+
+            $responseBody = [
+                'message' => 'Internal Server Error',
+                'details' => "$message",
+            ];
+            $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
+            return new JsonResponse($responseBody, 500);
         }
     }
 }
