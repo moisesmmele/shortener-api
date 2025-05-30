@@ -10,7 +10,6 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Click::class)]
 class ClickTest extends TestCase
 {
-
     #[Test]
     public function setId_throws_exception_when_zero()
     {

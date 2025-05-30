@@ -45,7 +45,7 @@ class LinkTest extends TestCase
     }
 
     #[Test]
-    public function setLongUrl_throws_exception_when_url_has_invalid_chars():void
+    public function setLongUrl_throws_exception_when_url_has_invalid_chars(): void
     {
         $invalidUrl = 'http://google .com';
         $link = new Link();
