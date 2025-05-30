@@ -8,7 +8,7 @@ class Click
 {
     private int $id;
     private int $linkId;
-    private string $utcTimestamp;
+    private \DateTimeImmutable $utcTimestamp;
     private string $sourceIp;
     private string $referrer;
     private string $flag;
@@ -20,6 +20,9 @@ class Click
 
     public function setId(int $id): void
     {
+        if ($id <= 0 || $id === null) {
+            throw new \DomainException('Id cannot be negative or zero');
+        }
         $this->id = $id;
     }
 
@@ -30,25 +33,37 @@ class Click
 
     public function setLinkId(int $linkId): void
     {
+        if ($linkId <= 0 || $linkId === null) {
+            throw new \DomainException('Link id cannot be negative or zero');
+        }
+
         $this->linkId = $linkId;
     }
 
-    public function getUtcTimestamp(): string
+    public function getUtcTimestamp(): \DateTimeImmutable
     {
         return $this->utcTimestamp;
     }
 
-    public function setUtcTimestamp(string $timestamp): void
+    public function getUtcTimestampString(): string
     {
-        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', $timestamp)) {
-            throw new \DomainException("Invalid timestamp format. Should be YYYY-MM-DD HH:MM:SS");
+        return $this->utcTimestamp->format('Y-m-d H:i:s');
+    }
+    public function setUtcTimestamp(string|\DateTimeImmutable $timestamp): void
+    {
+        if (is_string($timestamp)) {
+            if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', $timestamp)) {
+                throw new \DomainException("Invalid timestamp format. Should be YYYY-MM-DD HH:MM:SS");
+            }
+            $timestamp = new \DateTimeImmutable($timestamp);
         }
+
         $this->utcTimestamp = $timestamp;
     }
 
     public function generateUtcTimestamp(): void
     {
-        $this->utcTimestamp = gmdate('Y-m-d H:i:s');
+        $this->setUtcTimestamp(gmdate('Y-m-d H:i:s'));
     }
     public function getSourceIp(): string
     {
@@ -58,7 +73,7 @@ class Click
     public function setSourceIp(string $sourceIp): void
     {
         if (!preg_match('^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$^', $sourceIp)) {
-            throw new \Exception("Invalid ip address");
+            throw new \DomainException("Invalid ip address");
         }
         $this->sourceIp = $sourceIp;
     }
@@ -70,8 +85,24 @@ class Click
 
     public function setReferrer(string $referrer): void
     {
-        $sanitized = filter_var($referrer, FILTER_SANITIZE_URL);
-        $this->referrer = $sanitized;
+        if (!$referrer) {
+            throw new \DomainException('Referrer was not provided.');
+        }
+
+        if (!filter_var($referrer, FILTER_VALIDATE_URL)) {
+            throw new \DomainException("Invalid referrer.");
+        }
+
+        $parts = parse_url($referrer);
+        if (empty($parts['scheme']) || empty($parts['host'])) {
+            throw new \DomainException("Invalid referrer. Missing scheme or host.");
+        }
+
+        if (preg_match('/\s/', $referrer)) {
+            throw new \DomainException("Invalid referrer. Link contains invalid characters.");
+        }
+
+        $this->referrer = $referrer;
     }
     public function getFlag(): string
     {
