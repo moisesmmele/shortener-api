@@ -1,4 +1,8 @@
 Click (Moises\ShortenerApi\Tests\Domain\Click)
+ [x] SetId throws exception when zero
+ [x] SetId throws exception when negative
+ [x] SetLinkId throws exception when zero
+ [x] SetLinkId throws exception when negative
  [x] SetUtcTimestamp accepts valid string format
  [x] SetUtcTimestamp accepts DateTimeImmutable
  [x] SetUtcTimestamp throws exception when invalid format
@@ -6,8 +10,20 @@ Click (Moises\ShortenerApi\Tests\Domain\Click)
  [x] GetUtcTimestampString returns valid datetime string
  [x] GenerateUtcTimestamp sets utcTimestamp to valid dateTimeImmutable now
  [x] SetSourceIp accepts valid string format
- [x] SetSourceIp throws exception when ip above range
+ [x] SetSourceIp throws exception when invalid string
+ [x] SetSourceIp throws exception when ip out of range
  [x] SetReferrer accepts valid referrer
  [x] SetReferrer throws exception when malformed url
  [x] SetReferrer throws exception when no schema
+ [x] SetReferrer throws exception when url contains spaces
+
+Link (Moises\ShortenerApi\Tests\Domain\Link)
+ [x] SetId throws exception when negative
+ [x] SetId throws exception when zero
+ [x] SetLongUrl throws exception when url is empty
+ [x] SetLongUrl throws exception when url has no scheme
+ [x] SetLongUrl throws exception when url has invalid chars
+ [x] SetLongUrl throws exception when url has more than 2048 chars
+ [x] SetShortcode throws exception when shortcode is longer than provided max length
+ [x] SetShortcode must decapitalize provided shortcode
 

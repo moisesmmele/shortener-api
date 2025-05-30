@@ -3,8 +3,11 @@
 namespace Moises\ShortenerApi\Tests\Domain;
 
 use Moises\ShortenerApi\Domain\Entities\Link;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+
+#[CoversClass(Link::class)]
 
 class LinkTest extends TestCase
 {
