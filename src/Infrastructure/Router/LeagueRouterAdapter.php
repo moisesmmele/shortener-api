@@ -10,6 +10,7 @@ use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use League\Route\Strategy\ApplicationStrategy;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequestFactory;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use League\Route\Router;
@@ -20,9 +21,9 @@ class LeagueRouterAdapter implements RouterInterface
     private Router $router;
     private LoggerInterface $logger;
 
-    public function __construct(Router $router, Container $container, LoggerInterface $logger)
+    public function __construct(Router $leagueRouter, ContainerInterface $container, LoggerInterface $logger)
     {
-        $this->router = $router;
+        $this->router = $leagueRouter;
         $strategy = new ApplicationStrategy();
         $strategy->setContainer($container);
         $this->router->setStrategy($strategy);
