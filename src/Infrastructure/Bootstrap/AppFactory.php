@@ -9,6 +9,7 @@ use Moises\ShortenerApi\Infrastructure\App;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use DI\Container;
+use function DI\env;
 
 class AppFactory
 {
@@ -34,6 +35,10 @@ class AppFactory
 
     private static function setDebugMode(): void
     {
-        define('APP_DEBUG', (bool) $_ENV['APP_DEBUG']);
+        if ($_ENV['APP_DEBUG'] === 'true') {
+            define('APP_DEBUG', true);
+        } else {
+            define('APP_DEBUG', false);
+        }
     }
 }

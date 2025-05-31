@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Controllers;
 
+use Laminas\Diactoros\Response;
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
+use Moises\ShortenerApi\Application\UseCases\CollectClicksByLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewLinkUseCase;
+use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
+use PHPUnit\Util\Json;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -117,5 +121,48 @@ class LinkController
             $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
             return new JsonResponse($responseBody, 500);
         }
+    }
+    public function show(ServerRequestInterface $request, $params): ResponseInterface
+    {
+        $shortcode = $params['shortcode'];
+        $method = $request->getMethod();
+        $uri = $request->getUri();
+        $path = $uri->getPath();
+        $logContext = [
+            "class_method" => __METHOD__,
+            'request' => [
+                'method' => $method,
+                'path' => $path,
+            ]
+        ];
+        try {
+            $resolveShortenedLinkUseCase = $this->useCaseFactory->create(ResolveShortenedLinkUseCase::class);
+            $collectClicksByLinkUseCase = $this->useCaseFactory->create(CollectClicksByLinkUseCase::class);
+            $linkDto = $resolveShortenedLinkUseCase->execute($shortcode);
+            $clicks = $collectClicksByLinkUseCase->execute($linkDto);
+            $clicksArray = [];
+            foreach ($clicks as $click) {
+                $clicksArray[] = [
+                    'id' => $click->getId(),
+                    'sourceAddress' => $click->getSourceAddress(),
+                    'referrerAddress' => $click->getReferrerAddress(),
+                    'timestamp' => $click->getUtcTimestampString(),
+                ];
+            }
+            $body = [
+                'status' => 'OK',
+                'link' => [
+                    'id' => $linkDto->getId(),
+                    'shortCode' => $linkDto->getShortCode(),
+                    'longUrl' => $linkDto->getLongUrl(),
+                ],
+                'clicks' => $clicksArray,
+            ];
+            return new jsonResponse($body);
+        } catch (\Throwable $exception) {
+            $message =  $exception->getMessage();
+            echo $message;
+        }
+        return new JsonResponse([]);
     }
 }

@@ -9,10 +9,13 @@ Click (Moises\ShortenerApi\Tests\Domain\Click)
  [x] GetUtcTimestamp returns valid datetime object
  [x] GetUtcTimestampString returns valid datetime string
  [x] GenerateUtcTimestamp sets utcTimestamp to valid dateTimeImmutable now
- [x] SetSourceIp accepts valid string format
+ [x] SetSourceIp accepts valid ipv4 string format
+ [x] SetSourceIp accepts valid ipv6 string format
  [x] SetSourceIp throws exception when invalid string
  [x] SetSourceIp throws exception when ip out of range
- [x] SetReferrer accepts valid referrer
+ [x] SetReferrer accepts valid url referrer
+ [ ] SetReferrer accepts valid ip address referrer
+ [x] SetReferrer throws exception when ip address referrer out of range
  [x] SetReferrer throws exception when malformed url
  [x] SetReferrer throws exception when no schema
  [x] SetReferrer throws exception when url contains spaces

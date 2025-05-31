@@ -72,8 +72,10 @@ class Click
 
     public function setSourceIp(string $sourceIp): void
     {
-        if (!preg_match('^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$^', $sourceIp)) {
-            throw new \DomainException("Invalid ip address");
+
+        if (!filter_var($sourceIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) &&
+            !filter_var($sourceIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            throw new \DomainException("Source IP Address does not match pattern");
         }
         $this->sourceIp = $sourceIp;
     }
@@ -85,11 +87,18 @@ class Click
 
     public function setReferrer(string $referrer): void
     {
+        if ($referrer === 'localhost' || $referrer === '127.0.0.1' || $referrer === '::1') {
+            $this->referrer = $referrer;
+            return;
+        }
+
         if (!$referrer) {
             throw new \DomainException('Referrer was not provided.');
         }
 
-        if (!filter_var($referrer, FILTER_VALIDATE_URL)) {
+        if (!filter_var($referrer, FILTER_VALIDATE_URL) &&
+            !filter_var($referrer, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) &&
+            !filter_var($referrer, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             throw new \DomainException("Invalid referrer.");
         }
 

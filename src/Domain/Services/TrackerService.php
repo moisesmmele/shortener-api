@@ -23,6 +23,7 @@ class TrackerService
             $click->setFlag('suspicious');
         }
 
+        $click->setFlag('Not Implemented');
         return $click;
     }
 

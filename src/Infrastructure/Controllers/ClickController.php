@@ -48,7 +48,7 @@ class ClickController
 
             $shortcode = str_replace('/', '', $path);
             $sourceAddress = $request->getServerParams()['REMOTE_ADDR'];
-            $referrerAddress = $request->getHeaderLine('Referer');
+            $referrerAddress = $this->validateReferrer($sourceAddress, $request->getHeaderLine('Referer'));
 
             $linkDto = $resolveShortenedLinkUseCase->execute($shortcode);
 
@@ -56,9 +56,10 @@ class ClickController
                 $logContext['link_info'] = [
                     'shortcode' => $shortcode,
                 ];
+                $logContext['outcome'] = 'resolved, but link not found';
 
                 $message = "[$method] [$path] 404 Not Found";
-                $this->logger->info($message, $logContext[] = ['outcome' => 'resolved, but link not found']);
+                $this->logger->info($message, $logContext);
                 return new TextResponse('404 Not found.', 404);
             }
 
@@ -68,7 +69,30 @@ class ClickController
             $this->logger->info("[$method] [$path] 200 OK", $logContext);
             return new RedirectResponse($linkDto->getLongUrl());
 
-        } catch (\Throwable $exception) {
+        } catch (\DomainException $domainException) {
+
+            $message = $domainException->getMessage();
+            $code = $domainException->getCode();
+            $trace = $domainException->getTrace();
+            $traceString = $domainException->getTraceAsString();
+
+            $logContext['exception'] = [
+                'message' => $message,
+                'code' => $code,
+                'trace' => $trace,
+            ];
+            $logContext['outcome'] = ['unable to resolve due to internal server error'];
+            $logContext['aditional_info'] = [
+                'source_address' => $sourceAddress,
+                'referrer_address' => $referrerAddress,
+            ];
+
+            $this->logger->warning("[$method] [$path] 400 Bad Request ($message)", $logContext);
+            if (APP_DEBUG) {
+                error_log('stacktrace: ' . PHP_EOL . $traceString);
+            }
+            return new TextResponse("400 Bad Request ($message)", 400);
+        }catch (\Throwable $exception) {
 
             $message = $exception->getMessage();
             $code = $exception->getCode();
@@ -80,13 +104,25 @@ class ClickController
                 'code' => $code,
                 'trace' => $trace,
             ];
+            $logContext['outcome'] = ['unable to resolve due to internal server error'];
 
-            $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext[] =
-            ['outcome' => 'unable to resolve due to internal server error']);
+            $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
             if (APP_DEBUG) {
                 error_log('stacktrace: ' . PHP_EOL . $traceString);
             }
             return new TextResponse('500 Internal Server Error', 500);
         }
     }
+    public function validateReferrer(string $referrer, string $sourceIp): string
+{
+    if ($referrer === '') {
+        if ($sourceIp === 'localhost' || $sourceIp === '127.0.0.1' || $sourceIp === '::1') {
+            return 'localhost';
+        } else {
+            return 'not provided';
+        }
+    }
+    return $referrer;
+}
+
 }

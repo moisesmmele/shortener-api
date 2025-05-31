@@ -131,7 +131,7 @@ class ClickTest extends TestCase
         $this->assertLessThanOrEqual($after->getTimestamp(), $property->getValue($click)->getTimestamp());
     }
     #[Test]
-    public function setSourceIp_accepts_valid_string_format(): void
+    public function setSourceIp_accepts_valid_ipv4_string_format(): void
     {
         $validIpFormat = '123.123.123.123';
         $click = new Click();
@@ -141,6 +141,30 @@ class ClickTest extends TestCase
         $reflection = new \ReflectionClass($click);
         $property = $reflection->getProperty('sourceIp');
         $this->assertEquals($validIpFormat, $property->getValue($click));
+    }
+    #[Test]
+    public function setSourceIp_accepts_valid_ipv6_string_format(): void
+    {
+        $validIpv6Addresses = [
+            "2001:0db8:85a3:0000:0000:8a2e:0370:7334",       # no compression
+            "2001:db8:85a3:0:0:8a2e:370:7334",               # leading zeros removed
+            "2001:db8:85a3::8a2e:370:7334",                   # consecutive zero groups compressed (::)
+            "2001:db8::8a2e:370:7334",                        # longer zero sequence compressed
+            "::1",                                            # loopback address, fully compressed
+            "fe80::",                                         # link-local prefix compressed
+            "2001:0db8::",                                    # trailing zeros compressed
+            "2001:0db8:0000:0000:0000:0000:0000:0001",        # minimal compression possible
+            "2001:db8::1"                                     # same with maximal compression
+        ];
+
+        $click = new Click();
+        $reflection = new \ReflectionClass($click);
+
+        foreach ($validIpv6Addresses as $ipv6Address) {
+            $click->setSourceIp($ipv6Address);
+            $property = $reflection->getProperty('sourceIp');
+            $this->assertEquals($ipv6Address, $property->getValue($click));
+        }
     }
     #[Test]
     public function setSourceIp_throws_exception_when_invalid_string(): void
@@ -160,7 +184,7 @@ class ClickTest extends TestCase
         $click->setSourceIp($invalidIpFormat);
     }
     #[Test]
-    public function setReferrer_accepts_valid_referrer(): void
+    public function setReferrer_accepts_valid_url_referrer(): void
     {
         $validReferrer = 'http://www.referrer.com/path/to/referrer.html?query=params';
 
@@ -171,6 +195,27 @@ class ClickTest extends TestCase
         $property = $reflection->getProperty('referrer');
 
         $this->assertEquals($validReferrer, $property->getValue($click));
+    }
+    #[Test]
+    public function setReferrer_accepts_valid_ip_address_referrer(): void
+    {
+        $validReferrer = '122.123.123.123';
+
+        $click = new Click();
+        $click->setReferrer($validReferrer);
+
+        $reflection = new \ReflectionClass($click);
+        $property = $reflection->getProperty('referrer');
+
+        $this->assertEquals($validReferrer, $property->getValue($click));
+    }
+    #[Test]
+    public function setReferrer_throws_exception_when_ip_address_referrer_out_of_range(): void
+    {
+        $invalidReferrer = '257.257.257.257';
+        $click = new Click();
+        $this->expectException(\DomainException::class);
+        $click->setReferrer($invalidReferrer);
     }
     #[Test]
     public function setReferrer_throws_exception_when_malformed_url(): void
