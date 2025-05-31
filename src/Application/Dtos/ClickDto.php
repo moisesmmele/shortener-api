@@ -13,7 +13,7 @@ final class ClickDto
     private string $sourceIp;
     private string $referrer;
     private string $flag;
-    
+
     public static function fromEntity(Click $click): ClickDto
     {
         $clickDto = new self();

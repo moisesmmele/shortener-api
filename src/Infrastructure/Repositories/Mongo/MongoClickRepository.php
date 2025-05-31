@@ -23,9 +23,11 @@ class MongoClickRepository implements ClickRepository
     {
 
         $collection = $this->client->getCollection($_ENV['DB_NAME'], 'clicks');
+        $id = $collection->countDocuments() + 1;
         $result = $collection->insertOne([
+            'id' => $id,
             'link_id' => $click->getLinkId(),
-            'utc_timestamp' => $click->getUtcTimestamp(),
+            'utc_timestamp' => $click->getUtcTimestampString(),
             'source_ip' => $click->getSourceIp(),
             'referrer' => $click->getReferrer(),
             'flag' => $click->getFlag(),
@@ -42,12 +44,12 @@ class MongoClickRepository implements ClickRepository
         $clicksObj = [];
         foreach ($clicks as $click) {
             $clickObj = new Click();
-            $clickObj->setId($click->getId());
-            $clickObj->setLinkId($click->getLinkId());
-            $clickObj->setUtcTimestamp($click->getUtcTimestamp());
-            $clickObj->setSourceIp($click->getSourceIp());
-            $clickObj->setReferrer($click->getReferrer());
-            $clickObj->setFlag($click->getFlag());
+            $clickObj->setId($click['id']);
+            $clickObj->setLinkId($click['link_id']);
+            $clickObj->setUtcTimestamp($click['utc_timestamp']);
+            $clickObj->setSourceIp($click['source_ip']);
+            $clickObj->setReferrer($click['referrer']);
+            $clickObj->setFlag($click['flag']);
             $clicksObj[] = $clickObj;
         }
         return $clicksObj;

@@ -3,6 +3,7 @@
 namespace Moises\ShortenerApi\Infrastructure\Services\Logger;
 
 use Psr\Log\LoggerInterface;
+
 class Logger implements LoggerInterface
 {
     private Log $lastLog;

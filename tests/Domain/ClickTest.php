@@ -122,7 +122,6 @@ class ClickTest extends TestCase
         $click->generateUtcTimestamp();
         $after = new \DateTimeImmutable();
 
-
         $reflection = new \ReflectionClass($click);
         $property = $reflection->getProperty('utcTimestamp');
 

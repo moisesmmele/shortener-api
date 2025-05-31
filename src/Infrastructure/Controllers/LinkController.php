@@ -102,7 +102,7 @@ class LinkController
             $this->logger->critical("[$method] [$path] 400 Bad Request ($message)", $logContext);
             return new JsonResponse($responseBody, 400);
             //catch other exceptions (probably 500s Internal server Error)
-        }  catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             $message =  $exception->getMessage();
             $code = $exception->getCode();
             $trace  = $exception->getTrace();
@@ -144,8 +144,8 @@ class LinkController
             foreach ($clicks as $click) {
                 $clicksArray[] = [
                     'id' => $click->getId(),
-                    'sourceAddress' => $click->getSourceAddress(),
-                    'referrerAddress' => $click->getReferrerAddress(),
+                    'sourceAddress' => $click->getSourceIp(),
+                    'referrerAddress' => $click->getReferrer(),
                     'timestamp' => $click->getUtcTimestampString(),
                 ];
             }
@@ -158,11 +158,28 @@ class LinkController
                 ],
                 'clicks' => $clicksArray,
             ];
-            return new jsonResponse($body);
         } catch (\Throwable $exception) {
             $message =  $exception->getMessage();
-            echo $message;
+            $code = $exception->getCode();
+            $trace  = $exception->getTrace();
+            $traceString = $exception->getTraceAsString();
+            $logContext['outcome'] = 'Exception';
+            $logContext['exception'] = [
+                'message' => $message,
+                'code' => $code,
+                'trace' => $trace,
+                'traceString' => $traceString,
+            ];
+            $this->logger->error("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
+            $responseBody = [
+                'message' => 'Internal Server Error',
+                'details' => "$message",
+            ];
+            if (APP_DEBUG) {
+                error_log("trace:" . PHP_EOL . "$traceString");
+            }
+            return new JsonResponse($responseBody, 500);
         }
-        return new JsonResponse([]);
+        return new JsonResponse($body, 200);
     }
 }

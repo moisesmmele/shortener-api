@@ -12,6 +12,7 @@ class TrackerService
     public function registerClick(Link $link, string $sourceAddress, string $referrerAddress): Click
     {
         $click = new Click();
+        $click->setId($this->generateClickId());
         $click->setLinkId($link->getId());
         $click->setSourceIp($sourceAddress);
         $click->setReferrer($referrerAddress);
@@ -31,5 +32,9 @@ class TrackerService
     {
         // Placeholder logic; replace with real rules
         return $click->getSourceIp() === '127.0.0.1';
+    }
+    private function generateClickId(): int
+    {
+        return 1;
     }
 }

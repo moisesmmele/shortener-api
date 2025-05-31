@@ -92,7 +92,7 @@ class ClickController
                 error_log('stacktrace: ' . PHP_EOL . $traceString);
             }
             return new TextResponse("400 Bad Request ($message)", 400);
-        }catch (\Throwable $exception) {
+        } catch (\Throwable $exception) {
 
             $message = $exception->getMessage();
             $code = $exception->getCode();
@@ -114,15 +114,15 @@ class ClickController
         }
     }
     public function validateReferrer(string $referrer, string $sourceIp): string
-{
-    if ($referrer === '') {
-        if ($sourceIp === 'localhost' || $sourceIp === '127.0.0.1' || $sourceIp === '::1') {
-            return 'localhost';
-        } else {
-            return 'not provided';
+    {
+        if ($referrer === '') {
+            if ($sourceIp === 'localhost' || $sourceIp === '127.0.0.1' || $sourceIp === '::1') {
+                return 'localhost';
+            } else {
+                return 'not provided';
+            }
         }
+        return $referrer;
     }
-    return $referrer;
-}
 
 }
