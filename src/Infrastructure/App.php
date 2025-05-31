@@ -19,4 +19,10 @@ class App
         $response = $this->router->dispatch();
         $this->router->handleResponse($response);
     }
+    public function after(): void
+    {
+        if (IS_FASTCGI) {
+            fastcgi_finish_request();
+        }
+    }
 }

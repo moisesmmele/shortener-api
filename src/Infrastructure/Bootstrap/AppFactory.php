@@ -42,4 +42,8 @@ class AppFactory
             define('APP_DEBUG', false);
         }
     }
+    private static function setFastCgiMode(): void
+    {
+        define('IS_FASTCGI', function_exists('fastcgi_finish_request'));
+    }
 }

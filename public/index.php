@@ -7,3 +7,4 @@ require BASE_PATH . "/vendor/autoload.php";
 
 $app = AppFactory::create();
 $app->handle();
+$app->after();
