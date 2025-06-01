@@ -16,7 +16,8 @@ class App
     }
     public function before()
     {
-        //pre-request logic here, like middleware registration
+        error_log('this is before request handling');
+        error_log((new \DateTimeImmutable())->format('Y-m-d H:i:s.u'));
     }
     public function handle(): void
     {
@@ -30,6 +31,10 @@ class App
         //otherwise you're increasing TTFB and tasks should be handled by cronjobs or dispatched through a queue
         if (IS_FASTCGI) {
             fastcgi_finish_request();
+        }
+        if (IS_FASTCGI) {
+            error_log('this is after request handling');
+            error_log((new \DateTimeImmutable())->format('Y-m-d H:i:s.u'));
         }
     }
 
