@@ -18,8 +18,7 @@ class AppFactory
         self::setDebugMode();
         self::setFastCgiMode();
         $container = self::container();
-        $router = $container->get(RouterInterface::class);
-        return new App($router);
+        return $container->make(App::class);
     }
     public static function container(): Container
     {

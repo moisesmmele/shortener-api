@@ -5,23 +5,29 @@ declare(strict_types=1);
 namespace Moises\ShortenerApi\Infrastructure;
 
 use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
+use Psr\Http\Message\ServerRequestFactoryInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 class App
 {
     private RouterInterface $router;
+    private ServerRequestInterface $request;
+    private ServerRequestFactoryInterface $requestFactory;
 
-    public function __construct(RouterInterface $router)
+
+    public function __construct(RouterInterface $router, ServerRequestFactoryInterface $requestFactory)
     {
         $this->router = $router;
+        $this->requestFactory = $requestFactory;
     }
     public function before()
     {
-        error_log('this is before request handling');
-        error_log((new \DateTimeImmutable())->format('Y-m-d H:i:s.u'));
+        $this->request = $this->requestFactory->fromGlobals();
     }
     public function handle(): void
     {
-        $response = $this->router->dispatch();
+        $response = $this->router->handle($this->request);
         $this->router->handleResponse($response);
     }
     public function after(): void

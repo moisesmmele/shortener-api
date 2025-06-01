@@ -9,12 +9,11 @@ use League\Route\Http\Exception\NotFoundException;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use League\Route\Strategy\ApplicationStrategy;
 use Laminas\Diactoros\Response\JsonResponse;
-use Laminas\Diactoros\ServerRequestFactory;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use League\Route\Router;
-use DI\Container;
 
 class LeagueRouterAdapter implements RouterInterface
 {
@@ -31,9 +30,8 @@ class LeagueRouterAdapter implements RouterInterface
         $this->logger = $logger;
     }
 
-    public function dispatch(): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $request = ServerRequestFactory::fromGlobals();
         $method = $request->getMethod();
         $uri = $request->getUri();
         $path = $uri->getPath();
@@ -74,33 +72,48 @@ class LeagueRouterAdapter implements RouterInterface
         }
     }
 
-    public function get(string $uri, callable|array|string $handler): void
+    public function get(string $uri, callable|array|string $handler, array $middleware = []): void
     {
-        $this->router->map('GET', $uri, $handler);
+        $route = $this->router->map('GET', $uri, $handler);
+        $this->applyMiddleware($route, $middleware);
     }
 
-    public function post(string $uri, callable|array|string $handler): void
+    public function post(string $uri, callable|array|string $handler, array $middleware = []): void
     {
-        $this->router->map('POST', $uri, $handler);
+        $route = $this->router->map('POST', $uri, $handler);
+        $this->applyMiddleware($route, $middleware);
     }
 
-    public function put(string $uri, callable|array|string $handler): void
+    public function put(string $uri, callable|array|string $handler, array $middleware = []): void
     {
-        $this->router->map('PUT', $uri, $handler);
+        $route = $this->router->map('PUT', $uri, $handler);
+        $this->applyMiddleware($route, $middleware);
     }
 
-    public function patch(string $uri, callable|array|string $handler): void
+    public function patch(string $uri, callable|array|string $handler, array $middleware = []): void
     {
-        $this->router->map('PATCH', $uri, $handler);
+        $route = $this->router->map('PATCH', $uri, $handler);
+        $this->applyMiddleware($route, $middleware);
     }
 
-    public function delete(string $uri, callable|array|string $handler): void
+    public function delete(string $uri, callable|array|string $handler, array $middleware = []): void
     {
-        $this->router->map('DELETE', $uri, $handler);
+        $route = $this->router->map('DELETE', $uri, $handler);
+        $this->applyMiddleware($route, $middleware);
     }
 
-    public function options(string $uri, callable|array|string $handler): void
+    public function options(string $uri, callable|array|string $handler, array $middleware = []): void
     {
-        $this->router->map('OPTIONS', $uri, $handler);
+        $route = $this->router->map('OPTIONS', $uri, $handler);
+        $this->applyMiddleware($route, $middleware);
+    }
+
+    public function applyMiddleware($route, array $middleware): void
+    {
+        if (!empty($middleware)) {
+            foreach ($middleware as $mw) {
+                $route->middleware($mw);
+            }
+        }
     }
 }

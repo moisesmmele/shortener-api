@@ -1,6 +1,7 @@
 <?php
 
 use Laminas\Diactoros\Response\JsonResponse;
+use Moises\ShortenerApi\Application\BasicMiddleware;
 use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
 use Moises\ShortenerApi\Infrastructure\Controllers\ClickController;
 use Moises\ShortenerApi\Infrastructure\Controllers\LinkController;
@@ -18,16 +19,17 @@ return function (RouterInterface $router) {
             ]
         ];
         $this->logger->info("[$method] [$path] 200 OK", $logContext);
-        return new JsonResponse([
+        $response = new JsonResponse([
             'status' => 'OK',
             'message' => 'Hello World!',
-            'php_version' => phpversion(),
+            'php_version' => PHP_VERSION,
         ]);
-    });
+        return $response;
+    }, [new BasicMiddleware()]);
 
     $router->get('/{shortcode}', [ClickController::class, 'click']);
 
-    $router->get('/tracker/{shortcode}', [LinkController::class, 'show']);
+    $router->get('/tracker/{shortcode}', [LinkController::class, 'show'],[new BasicMiddleware()]);
     $router->post('/register/link', [LinkController::class, 'create']);
     $router->delete('/{shortcode}', [linkController::class, 'destroy']);
 };
