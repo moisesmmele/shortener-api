@@ -14,7 +14,7 @@ Click (Moises\ShortenerApi\Tests\Domain\Click)
  [x] SetSourceIp throws exception when invalid string
  [x] SetSourceIp throws exception when ip out of range
  [x] SetReferrer accepts valid url referrer
- [ ] SetReferrer accepts valid ip address referrer
+ [x] SetReferrer accepts valid ip address referrer
  [x] SetReferrer throws exception when ip address referrer out of range
  [x] SetReferrer throws exception when malformed url
  [x] SetReferrer throws exception when no schema

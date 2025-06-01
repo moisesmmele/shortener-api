@@ -89,7 +89,12 @@ class Click
     {
 
         if ($referrer === 'localhost' || $referrer === '127.0.0.1' || $referrer === '::1') {
-            $this->referrer = $referrer;
+            $this->referrer = 'localhost';
+            return;
+        }
+
+        if ($referrer === 'Not Provided') {
+            $this->referrer = 'Not Provided';
             return;
         }
 
@@ -97,9 +102,13 @@ class Click
             throw new \DomainException('Referrer was not provided.');
         }
 
-        if (!filter_var($referrer, FILTER_VALIDATE_URL) &&
-            !filter_var($referrer, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) &&
-            !filter_var($referrer, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        if (filter_var($referrer, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+            Or filter_var($referrer, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $this->referrer = $referrer;
+            return;
+        }
+
+        if (!filter_var($referrer, FILTER_VALIDATE_URL)) {
             throw new \DomainException("Invalid referrer.");
         }
 

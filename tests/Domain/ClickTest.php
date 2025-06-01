@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 class ClickTest extends TestCase
 {
     #[Test]
-    public function setId_throws_exception_when_zero()
+    public function setId_throws_exception_when_malformed()
     {
         $invalidId = 0;
         $click = new Click();
@@ -190,6 +190,17 @@ class ClickTest extends TestCase
         $click = new Click();
         $click->setReferrer($validReferrer);
 
+        $reflection = new \ReflectionClass($click);
+        $property = $reflection->getProperty('referrer');
+
+        $this->assertEquals($validReferrer, $property->getValue($click));
+    }
+
+    public function setReferrer_accepts_NotProvided_string()
+    {
+        $validReferrer = 'Not Provided';
+        $click = new Click();
+        $click->setReferrer($validReferrer);
         $reflection = new \ReflectionClass($click);
         $property = $reflection->getProperty('referrer');
 

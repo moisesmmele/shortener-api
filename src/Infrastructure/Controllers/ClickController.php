@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Controllers;
 
-use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewClickUseCase;
-use Laminas\Diactoros\Response\RedirectResponse;
-use Laminas\Diactoros\Response\TextResponse;
+use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
+use Moises\ShortenerApi\Presentation\Factories\ResponseDecoratorFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
@@ -16,22 +15,25 @@ use Psr\Log\LoggerInterface;
 class ClickController
 {
     private UseCaseFactoryInterface $useCaseFactory;
+    private ResponseDecoratorFactory $responseDecoratorFactory;
     private LoggerInterface $logger;
 
-    public function __construct(UseCaseFactoryInterface $useCaseFactory, LoggerInterface $logger)
+    public function __construct(UseCaseFactoryInterface $useCaseFactory,
+                                ResponseDecoratorFactory $responseDecoratorFactory,
+                                LoggerInterface $logger)
     {
         $this->useCaseFactory = $useCaseFactory;
+        $this->responseDecoratorFactory = $responseDecoratorFactory;
         $this->logger = $logger;
     }
-    public function click(RequestInterface $request): ResponseInterface
+    public function click(RequestInterface $request, array $params): ResponseInterface
     {
+        $shortcode = $this->getShortcode($params);
         $method = $request->getMethod();
-        $uri = $request->getUri();
-        $path = $uri->getPath();
-
+        $path = $request->getUri()->getPath();
         $logContext = [
-            "class_method" => __METHOD__,
-            "request" => [
+            'class_method' => __METHOD__,
+            'request' => [
                 'method' => $method,
                 'path' => $path,
             ],
@@ -46,79 +48,80 @@ class ClickController
             $registerNewClickUseCase = $this->useCaseFactory
                 ->create(RegisterNewClickUseCase::class);
 
-            $shortcode = str_replace('/', '', $path);
-            $sourceAddress = $request->getServerParams()['REMOTE_ADDR'];
-            $referrerAddress = $this->validateReferrer($sourceAddress, $request->getHeaderLine('Referer'));
+            $sourceAddress = $this->getSourceAddress($request);
+            $referrerAddress = $this->getReferrer($request);
 
             $linkDto = $resolveShortenedLinkUseCase->execute($shortcode);
 
             if (is_null($linkDto)) {
-                $logContext['link_info'] = [
-                    'shortcode' => $shortcode,
-                ];
-                $logContext['outcome'] = 'resolved, but link not found';
-
-                $message = "[$method] [$path] 404 Not Found";
-                $this->logger->info($message, $logContext);
-                return new TextResponse('404 Not found.', 404);
+                $response = $this->responseDecoratorFactory->text();
+                $this->logger->info('404 Not Found', $logContext);
+                return $response->notFound();
             }
 
             $registerNewClickUseCase
                 ->execute($linkDto, $sourceAddress, $referrerAddress);
 
-            $this->logger->info("[$method] [$path] 200 OK", $logContext);
-            return new RedirectResponse($linkDto->getLongUrl());
+            $responseFactory = $this->responseDecoratorFactory->getResponse();
+            $this->logger->info('200 OK', $logContext);
+            return $responseFactory->withHeader('Location', $linkDto->getLongUrl())->withStatus(302);
 
         } catch (\DomainException $domainException) {
 
-            $message = $domainException->getMessage();
-            $code = $domainException->getCode();
-            $trace = $domainException->getTrace();
             $traceString = $domainException->getTraceAsString();
 
-            $logContext['exception'] = [
-                'message' => $message,
-                'code' => $code,
-                'trace' => $trace,
-            ];
-            $logContext['outcome'] = ['unable to resolve due to internal server error'];
-            $logContext['aditional_info'] = [
-                'source_address' => $sourceAddress,
-                'referrer_address' => $referrerAddress,
-            ];
-
-            $this->logger->warning("[$method] [$path] 400 Bad Request ($message)", $logContext);
             if (APP_DEBUG) {
                 error_log('stacktrace: ' . PHP_EOL . $traceString);
             }
-            return new TextResponse("400 Bad Request ($message)", 400);
+
+            $responseFactory = $this->responseDecoratorFactory->text();
+            $this->logger->info('400 Bad Request', $logContext);
+            return $responseFactory->error(message: $domainException->getMessage(), statusCode: 400);
+
         } catch (\Throwable $exception) {
 
-            $message = $exception->getMessage();
-            $code = $exception->getCode();
-            $trace = $exception->getTrace();
             $traceString = $exception->getTraceAsString();
-
+            $message = $exception->getMessage();
             $logContext['exception'] = [
                 'message' => $message,
-                'code' => $code,
-                'trace' => $trace,
+                'trace' => $traceString,
             ];
-            $logContext['outcome'] = ['unable to resolve due to internal server error'];
 
-            $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
             if (APP_DEBUG) {
-                error_log('stacktrace: ' . PHP_EOL . $traceString);
+                $message = "500 Internal Server Error".PHP_EOL.$message.PHP_EOL.$traceString;
+            } else {
+                $message = "500 Internal Server Error";
             }
-            return new TextResponse('500 Internal Server Error', 500);
+            $this->logger->error($message, $logContext);
+            $responseFactory = $this->responseDecoratorFactory->text();
+            return $responseFactory->error();
         }
     }
-    public function validateReferrer(string $referrer, string $sourceIp): string
+    public function getReferrer(RequestInterface $request): string
     {
-        if (APP_DEBUG) {
-            $referrer = 'https://www.localhost.com';
+        $referrer = $request->getHeaderLine('Referer');
+        if (empty($referrer)) {
+            $referrer = 'Not Provided';
         }
+
         return $referrer;
+    }
+
+    public function getShortcode(?array $params = null, ?string $path = null): string
+    {
+        if (!is_null($path)) {
+            return str_replace('/', '', $path);
+        }
+        return $params['shortcode'] ?? 'unknown';
+    }
+
+    public function getSourceAddress(RequestInterface $request): string
+    {
+        $addr = $request->getServerParams()['REMOTE_ADDR'];
+        if (empty($addr)) {
+            throw new \Exception('Source Address is not valid');
+        }
+        return $addr;
     }
 
 }

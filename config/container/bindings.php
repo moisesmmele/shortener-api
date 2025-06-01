@@ -1,6 +1,5 @@
 <?php
 
-use Laminas\Diactoros\ServerRequestFactory;
 use League\Route\Router;
 use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
@@ -11,7 +10,8 @@ use Moises\ShortenerApi\Infrastructure\Repositories\Mongo\MongoClickRepository;
 use Moises\ShortenerApi\Infrastructure\Repositories\Mongo\MongoLinkRepository;
 use Moises\ShortenerApi\Infrastructure\Router\LeagueRouterAdapter;
 use Moises\ShortenerApi\Infrastructure\Services\Logger\MongoLogger;
-use Psr\Http\Message\ServerRequestFactoryInterface;
+use Moises\ShortenerApi\Presentation\Contracts\ResponseDecoratorInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use function DI\autowire;
 use function DI\factory;
@@ -30,5 +30,5 @@ return array(
     UseCaseFactoryInterface::class => autowire(UseCaseFactory::class),
     LinkRepository::class => autowire(MongoLinkRepository::class),
     ClickRepository::class => autowire(MongoClickRepository::class),
-    ServerRequestFactoryInterface::class => autowire(ServerRequestFactory::class),
+    ResponseInterface::class => autowire(Laminas\Diactoros\Response::class),
 );
