@@ -115,12 +115,8 @@ class ClickController
     }
     public function validateReferrer(string $referrer, string $sourceIp): string
     {
-        if ($referrer === '') {
-            if ($sourceIp === 'localhost' || $sourceIp === '127.0.0.1' || $sourceIp === '::1') {
-                return 'localhost';
-            } else {
-                return 'not provided';
-            }
+        if (APP_DEBUG) {
+            $referrer = 'https://www.localhost.com';
         }
         return $referrer;
     }

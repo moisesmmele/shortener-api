@@ -87,6 +87,7 @@ class Click
 
     public function setReferrer(string $referrer): void
     {
+
         if ($referrer === 'localhost' || $referrer === '127.0.0.1' || $referrer === '::1') {
             $this->referrer = $referrer;
             return;
