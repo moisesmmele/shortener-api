@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Moises\ShortenerApi\Domain\Services;
+namespace Moises\ShortenerApi\Domain\Factories;
 
 use Moises\ShortenerApi\Domain\Entities\Link;
 
-class ShortenerService
+class LinkFactory
 {
     public function generateShortLink(string $longUrl): Link
     {

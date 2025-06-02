@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
-use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
-use Moises\ShortenerApi\Domain\Services\ShortenerService;
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
+use Moises\ShortenerApi\Domain\Factories\LinkFactory;
+use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
 
 class RegisterNewLinkUseCase
 {
     private LinkRepository $linkRepository;
-    private ShortenerService $shortenerService;
-    public function __construct(ShortenerService $shortenerService, LinkRepository $linkRepository)
+    private LinkFactory $shortenerService;
+    public function __construct(LinkFactory $shortenerService, LinkRepository $linkRepository)
     {
         $this->linkRepository = $linkRepository;
         $this->shortenerService = $shortenerService;

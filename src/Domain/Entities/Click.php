@@ -6,35 +6,35 @@ namespace Moises\ShortenerApi\Domain\Entities;
 
 class Click
 {
-    private int $id;
-    private int $linkId;
+    private string $id;
+    private string $linkId;
     private \DateTimeImmutable $utcTimestamp;
     private string $sourceIp;
     private string $referrer;
     private string $flag;
 
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }
 
-    public function setId(int $id): void
+    public function setId(string $id): void
     {
-        if ($id <= 0 || $id === null) {
-            throw new \DomainException('Id cannot be negative or zero');
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $id)) {
+            throw new \DomainException('Id should be a valid UUID-v4');
         }
         $this->id = $id;
     }
 
-    public function getLinkId(): int
+    public function getLinkId(): string
     {
         return $this->linkId;
     }
 
-    public function setLinkId(int $linkId): void
+    public function setLinkId(string $linkId): void
     {
-        if ($linkId <= 0 || $linkId === null) {
-            throw new \DomainException('Link id cannot be negative or zero');
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $id)) {
+            throw new \DomainException('Id should be a valid UUID-v4');
         }
 
         $this->linkId = $linkId;
@@ -59,11 +59,6 @@ class Click
         }
 
         $this->utcTimestamp = $timestamp;
-    }
-
-    public function generateUtcTimestamp(): void
-    {
-        $this->setUtcTimestamp(gmdate('Y-m-d H:i:s'));
     }
     public function getSourceIp(): string
     {

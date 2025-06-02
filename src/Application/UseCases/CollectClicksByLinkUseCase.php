@@ -4,17 +4,16 @@ namespace Moises\ShortenerApi\Application\UseCases;
 
 use Moises\ShortenerApi\Application\Dtos\ClickDto;
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
-use Moises\ShortenerApi\Domain\Entities\Click;
 use Moises\ShortenerApi\Domain\Entities\Link;
+use Moises\ShortenerApi\Domain\Factories\ClickFactory;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
-use Moises\ShortenerApi\Domain\Services\TrackerService;
 
 class CollectClicksByLinkUseCase
 {
-    private TrackerService $trackerService;
+    private ClickFactory $trackerService;
     private ClickRepository $clickRepository;
 
-    public function __construct(TrackerService $trackerService, ClickRepository $clickRepository)
+    public function __construct(ClickFactory $trackerService, ClickRepository $clickRepository)
     {
         $this->trackerService = $trackerService;
         $this->clickRepository = $clickRepository;

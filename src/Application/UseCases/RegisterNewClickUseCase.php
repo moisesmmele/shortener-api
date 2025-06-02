@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
-use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
-use Moises\ShortenerApi\Domain\Services\TrackerService;
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
 use Moises\ShortenerApi\Domain\Entities\Link;
+use Moises\ShortenerApi\Domain\Factories\ClickFactory;
+use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 
 class RegisterNewClickUseCase
 {
-    private TrackerService $trackerService;
+    private ClickFactory $trackerService;
     private ClickRepository $clickRepository;
-    public function __construct(TrackerService $trackerService, ClickRepository $clickRepository)
+    public function __construct(ClickFactory $trackerService, ClickRepository $clickRepository)
     {
         $this->clickRepository = $clickRepository;
         $this->trackerService = $trackerService;
