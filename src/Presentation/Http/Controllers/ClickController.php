@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Moises\ShortenerApi\Infrastructure\Controllers;
+namespace Moises\ShortenerApi\Presentation\Http\Controllers;
 
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewClickUseCase;
 use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
-use Moises\ShortenerApi\Presentation\Factories\ResponseDecoratorFactory;
-use Psr\Http\Message\ResponseInterface;
+use Moises\ShortenerApi\Presentation\Http\Factories\ResponseDecoratorFactory;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 class ClickController

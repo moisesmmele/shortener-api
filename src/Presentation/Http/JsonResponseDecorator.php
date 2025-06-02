@@ -1,8 +1,8 @@
 <?php
 
-namespace Moises\ShortenerApi\Presentation;
+namespace Moises\ShortenerApi\Presentation\Http;
 
-use Moises\ShortenerApi\Presentation\Contracts\ResponseDecoratorInterface;
+use Moises\ShortenerApi\Presentation\Http\Contracts\ResponseDecoratorInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class JsonResponseDecorator implements ResponseDecoratorInterface

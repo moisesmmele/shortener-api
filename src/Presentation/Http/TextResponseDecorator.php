@@ -1,8 +1,12 @@
 <?php
 
-namespace Moises\ShortenerApi\Presentation;
+//TODO: Refactor to use a single main method to write the response
+//success, error, notFound and other should be helper methods.
+//Also, should implement a way to add headers.
 
-use Moises\ShortenerApi\Presentation\Contracts\ResponseDecoratorInterface;
+namespace Moises\ShortenerApi\Presentation\Http;
+
+use Moises\ShortenerApi\Presentation\Http\Contracts\ResponseDecoratorInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class TextResponseDecorator implements ResponseDecoratorInterface

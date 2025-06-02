@@ -1,6 +1,10 @@
 <?php
 
-namespace Moises\ShortenerApi\Presentation\Contracts;
+//TODO: Refactor to use a single main method to write the response
+//success, error, notFound and other should be helper methods.
+//Also, should implement a way to add headers.
+
+namespace Moises\ShortenerApi\Presentation\Http\Contracts;
 
 use Psr\Http\Message\ResponseInterface;
 

@@ -16,9 +16,10 @@ class ClickFactory
         private TimestampGeneratorInterface $timestampGenerator,
     ){}
 
-    public function registerClick(Link $link,
-                                  string $sourceAddress,
-                                  string $referrerAddress
+    public function create(
+        Link $link,
+        string $sourceAddress,
+        string $referrerAddress
     ): Click
     {
         $click = new Click();

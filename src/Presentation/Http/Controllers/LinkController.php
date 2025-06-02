@@ -2,17 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Moises\ShortenerApi\Infrastructure\Controllers;
+namespace Moises\ShortenerApi\Presentation\Http\Controllers;
 
-use Laminas\Diactoros\Response;
+use Laminas\Diactoros\Response\JsonResponse;
 use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
 use Moises\ShortenerApi\Application\UseCases\CollectClicksByLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
-use PHPUnit\Util\Json;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Log\LoggerInterface;
 
 class LinkController

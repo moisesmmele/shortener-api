@@ -15,7 +15,18 @@ class TimestampGenerator implements TimestampGeneratorInterface
 
     public function validate(DateTimeImmutable $timestamp, ?string $timezone = null): bool
     {
-        //TODO: implement
+        if ($timezone !== null) {
+            try {
+                $expectedTimezone = new \DateTimeZone($timezone);
+            } catch (\Exception) {
+                return false;
+            }
+
+            if ($timestamp->getTimezone()->getName() !== $expectedTimezone->getName()) {
+                return false;
+            }
+        }
+
         return true;
     }
 }

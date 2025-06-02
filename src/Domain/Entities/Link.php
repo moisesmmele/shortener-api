@@ -6,21 +6,22 @@ namespace Moises\ShortenerApi\Domain\Entities;
 
 class Link
 {
-    private int $id;
+    private string $id;
     private string $longUrl;
     private string $shortcode;
     private int $shortcodeMaxLength = 6;
 
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }
 
-    public function setId(int $id): void
+    public function setId(string $id): void
     {
-        if ($id <= 0 || $id === null) {
-            throw new \DomainException('Id cannot be negative or null');
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $id)) {
+            throw new \DomainException('Id should be a valid UUID-v4');
         }
+
         $this->id = $id;
     }
 

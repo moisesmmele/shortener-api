@@ -1,10 +1,9 @@
 <?php
 
-namespace Moises\ShortenerApi\Presentation\Factories;
-use Laminas\Diactoros\Response;
-use Moises\ShortenerApi\Presentation\Contracts\ResponseDecoratorInterface;
-use Moises\ShortenerApi\Presentation\JsonResponseDecorator;
-use Moises\ShortenerApi\Presentation\TextResponseDecorator;
+namespace Moises\ShortenerApi\Presentation\Http\Factories;
+use Moises\ShortenerApi\Presentation\Http\Contracts\ResponseDecoratorInterface;
+use Moises\ShortenerApi\Presentation\Http\JsonResponseDecorator;
+use Moises\ShortenerApi\Presentation\Http\TextResponseDecorator;
 use Psr\Http\Message\ResponseInterface;
 
 class ResponseDecoratorFactory

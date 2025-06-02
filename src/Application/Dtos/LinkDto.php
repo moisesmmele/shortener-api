@@ -8,11 +8,11 @@ use Moises\ShortenerApi\Domain\Entities\Link;
 
 final class LinkDto
 {
-    private int $id;
+    private string $id;
     private string $longUrl;
     private string $shortcode;
 
-    public function __construct(int $id, string $longUrl, string $shortcode)
+    public function __construct(string $id, string $longUrl, string $shortcode)
     {
         $this->id = $id;
         $this->longUrl = $longUrl;
@@ -28,7 +28,7 @@ final class LinkDto
         );
     }
 
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }

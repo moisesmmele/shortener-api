@@ -7,20 +7,20 @@ namespace Moises\ShortenerApi\Application\UseCases;
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
 use Moises\ShortenerApi\Domain\Entities\Link;
 use Moises\ShortenerApi\Domain\Factories\ClickFactory;
+use Moises\ShortenerApi\Domain\Factories\LinkFactory;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 
 class RegisterNewClickUseCase
 {
     private ClickFactory $trackerService;
     private ClickRepository $clickRepository;
-    public function __construct(ClickFactory $trackerService, ClickRepository $clickRepository)
-    {
-        $this->clickRepository = $clickRepository;
-        $this->trackerService = $trackerService;
-    }
+    public function __construct(
+        private ClickFactory $clickFactory,
+        ClickRepository $clickRepository
+    ){}
     public function execute(LinkDto $linkDto, string $sourceAddress, string $referrerAddress): void
     {
-        $link = new Link();
+        $link = $this->clickFactory->registerClick($linkDto, $sourceAddress, $referrerAddress);
         $link->setId($linkDto->getId());
         $link->setShortcode($linkDto->getShortcode());
         $link->setLongUrl($linkDto->getLongUrl());
