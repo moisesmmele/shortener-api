@@ -9,7 +9,7 @@ use Psr\Container\ContainerInterface;
 
 class UseCaseFactory implements UseCaseFactoryInterface
 {
-    private $container;
+    private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {

@@ -24,4 +24,11 @@ class RegisterNewLinkUseCase
         $this->linkRepository->save($link);
         return LinkDto::fromEntity($link);
     }
+    public function validateShortcode(?array $params = null, ?string $path = null): string
+    {
+        if (!is_null($path)) {
+            return str_replace('/', '', $path);
+        }
+        return $params['shortcode'] ?? 'unknown';
+    }
 }

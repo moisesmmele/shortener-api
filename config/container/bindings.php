@@ -16,7 +16,9 @@ use function DI\autowire;
 use function DI\factory;
 
 return array(
+    //obs: autowire generate singletons in PHP-DI
     LoggerInterface::class => autowire(MongoLogger::class),
+    //could use autowire, this is manually done for future reference
     RouterInterface::class => factory(function (\Psr\Container\ContainerInterface $c) {
         static $routerAdapter = null;
         if ($routerAdapter === null) {

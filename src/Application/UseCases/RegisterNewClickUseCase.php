@@ -4,27 +4,44 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\UseCases;
 
+use Moises\ShortenerApi\Application\Dtos\ClickDto;
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
-use Moises\ShortenerApi\Domain\Entities\Link;
+use Moises\ShortenerApi\Application\Mappers\ClickMapper;
+use Moises\ShortenerApi\Application\Mappers\LinkMapper;
 use Moises\ShortenerApi\Domain\Factories\ClickFactory;
-use Moises\ShortenerApi\Domain\Factories\LinkFactory;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 
 class RegisterNewClickUseCase
 {
-    private ClickFactory $trackerService;
-    private ClickRepository $clickRepository;
     public function __construct(
         private ClickFactory $clickFactory,
-        ClickRepository $clickRepository
+        private ClickRepository $clickRepository,
+        private ClickMapper $clickMapper,
+        private LinkMapper $linkMapper
     ){}
-    public function execute(LinkDto $linkDto, string $sourceAddress, string $referrerAddress): void
+    public function execute(LinkDto $linkDto, string $sourceAddress, string $referrerAddress): ClickDto
     {
-        $link = $this->clickFactory->registerClick($linkDto, $sourceAddress, $referrerAddress);
-        $link->setId($linkDto->getId());
-        $link->setShortcode($linkDto->getShortcode());
-        $link->setLongUrl($linkDto->getLongUrl());
-        $click = $this->trackerService->registerClick($link, $sourceAddress, $referrerAddress);
+        $sourceAddress = $this->validateSourceAddress($sourceAddress);
+        $referrerAddress = $this->validateReferrer($referrerAddress);
+
+        $link = $this->linkMapper->fromDto($linkDto);
+        $click = $this->clickFactory->create($link, $sourceAddress, $referrerAddress);
         $this->clickRepository->save($click);
+        return $this->clickMapper->toDto($click);
+    }
+
+    public function validateReferrer(?string $referrer): string
+    {
+        if (empty($referrer)) {
+            return 'Not Provided';
+        }
+        return $referrer;
+    }
+    public function validateSourceAddress(?string $sourceAddress): string
+    {;
+        if (empty($sourceAddress)) {
+            throw new \Exception('Source Address not provided');
+        }
+        return $sourceAddress;
     }
 }

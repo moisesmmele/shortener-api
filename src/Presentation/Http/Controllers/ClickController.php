@@ -97,31 +97,4 @@ class ClickController
             return $responseFactory->error();
         }
     }
-    public function getReferrer(RequestInterface $request): string
-    {
-        $referrer = $request->getHeaderLine('Referer');
-        if (empty($referrer)) {
-            $referrer = 'Not Provided';
-        }
-
-        return $referrer;
-    }
-
-    public function getShortcode(?array $params = null, ?string $path = null): string
-    {
-        if (!is_null($path)) {
-            return str_replace('/', '', $path);
-        }
-        return $params['shortcode'] ?? 'unknown';
-    }
-
-    public function getSourceAddress(RequestInterface $request): string
-    {
-        $addr = $request->getServerParams()['REMOTE_ADDR'];
-        if (empty($addr)) {
-            throw new \Exception('Source Address is not valid');
-        }
-        return $addr;
-    }
-
 }
