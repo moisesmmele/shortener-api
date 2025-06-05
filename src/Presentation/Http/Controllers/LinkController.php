@@ -10,6 +10,8 @@ use Moises\ShortenerApi\Application\UseCases\CollectClicksByLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\UseCaseFactoryInterface;
+use Moises\ShortenerApi\Presentation\Http\Factories\ResponseDecoratorFactory;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -18,6 +20,7 @@ class LinkController
 {
     public function __construct(
         private UseCaseFactoryInterface $useCaseFactory,
+        private ResponseDecoratorFactory $responseFactory,
         private LoggerInterface $logger
     ){}
 
@@ -25,8 +28,7 @@ class LinkController
     {
         //get basic request info
         $method = $request->getMethod();
-        $uri = $request->getUri();
-        $path = $uri->getPath();
+        $path = $request->getUri()->getPath();
 
         //initiate logContext array with basic info
         $logContext = [
@@ -37,84 +39,83 @@ class LinkController
             ]
         ];
 
+        //try to register new link
         try {
-            //get the appropriate UseCase
-            /** @var RegisterNewLinkUseCase $registerNewLinkUseCase */
-            $registerNewLinkUseCase = $this->useCaseFactory
-                ->create(RegisterNewLinkUseCase::class);
-
-            //get aditional request info
-            $body = $request->getBody();
-            $contents = $body->getContents();
-            //decode json request to assoc array
-            $data = json_decode($contents, associative: true);
-
-            //checks if a url was provided, if not, return Bad Request
-            $url = $data['url'];
-            if (!$url) {
-                //add outcome to logContext array
-                $logContext['outcome'] = 'resolved, but no URL was provided for registration';
-                $this->logger->info('user provided no URL for registration', $logContext);
-                return new JsonResponse([
-                   'message' => 'Bad Request',
-                    'details' => 'No URL was provided for registration',
-                ], 400);
+            //get necessary variables
+            $url = $this->getRequestPayload($request, 'url');
+            //validate if required variables are not null
+            //TODO: EXTRACT TO REQUEST VALIDATOR
+            $valid = $this->validate($url);
+            if (!$valid) {
+                //log response
+                $this->logger->info('400 Bad Request', $logContext);
+                //get a new JsonResponseDecorator
+                $response = $this->responseFactory->json();
+                //write message through payload
+                $payload = ['details' => 'No URL was provided for registration',];
+                //return a BadRequest Json Response with payload
+                return $response->badRequest(data: $payload);
             }
 
-            //execute de UseCase with collected request data
-            $linkDto = $registerNewLinkUseCase->execute($url);
-            $responseBody = [
-                'message' => 'OK',
-                'link' => [
-                    'id' => $linkDto->getId(),
-                    'url' => $linkDto->getLongUrl(),
-                    'shortCode' => $linkDto->getShortCode(),
-                ]
+            //register the new link using UseCase
+            $linkDto = $this->registerNewLink($url);
+            //no need to validate linkDto because if it fails we should throw exception
+
+            //write payload with new link data in linkDto
+            $payload = [
+                'id' => $linkDto->getId(),
+                'url' => $linkDto->getLongUrl(),
+                'short_code' => $linkDto->getShortCode(),
+                'created_at' => $linkDto->getCreatedAt(),
             ];
 
+            //log success
             $this->logger->info("[$method] [$path] 201 Created", $logContext);
-            //returns Created Response
-            return new JsonResponse($responseBody, 201);
+
+            //return success json response
+            $response = $this->responseFactory->json();
+            return $response->success(data: $payload, message: "201 Created", statusCode: 201);
 
             //catch domain Exceptions (probably Bad Requests)
         } catch (\DomainException $domainException) {
 
-            $message =  $domainException->getMessage();
-            $code = $domainException->getCode();
-            $trace  = $domainException->getTrace();
-
-            $logContext['outcome'] = 'Domain Exception';
+            $traceString = $domainException->getTraceAsString();
+            $traceMessage = $domainException->getMessage();
             $logContext['exception'] = [
-                'message' => $message,
-                'code' => $code,
-                'trace' => $trace,
+                'message' => $traceMessage,
+                'trace' => $traceString,
             ];
 
-            $responseBody = [
-                'message' => 'Bad Request',
-                'details' => "$message",
-            ];
-            $this->logger->critical("[$method] [$path] 400 Bad Request ($message)", $logContext);
-            return new JsonResponse($responseBody, 400);
+            //if appdebug is set to true, then we can dump a stacktrace to the console
+            //otherwise, we just log it and return response
+            if (APP_DEBUG) {
+                error_log('stacktrace: ' . PHP_EOL . $traceString);
+            }
+
+            $this->logger->info('400 Bad Request', $logContext);
+            $message = "400 Bad Request ($traceMessage)";
+            $responseFactory = $this->responseFactory->json();
+            return $responseFactory->error(message: $message);
+
             //catch other exceptions (probably 500s Internal server Error)
         } catch (\Exception $exception) {
-            $message =  $exception->getMessage();
-            $code = $exception->getCode();
-            $trace  = $exception->getTrace();
-
-            $logContext['outcome'] = 'Exception';
+            $traceString = $exception->getTraceAsString();
+            $traceMessage = $exception->getMessage();
             $logContext['exception'] = [
-                'message' => $message,
-                'code' => $code,
-                'trace' => $trace,
+                'message' => $traceMessage,
+                'trace' => $traceString,
             ];
 
-            $responseBody = [
-                'message' => 'Internal Server Error',
-                'details' => "$message",
-            ];
-            $this->logger->critical("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
-            return new JsonResponse($responseBody, 500);
+            //if appdebug, we can formulate a more detailed message to output to console
+            //otherwise, just log it
+            if (APP_DEBUG) {
+                $message = "500 Internal Server Error".PHP_EOL.$traceMessage.PHP_EOL.$traceString;
+            } else {
+                $message = "500 Internal Server Error";
+            }
+            $this->logger->error($message, $logContext);
+            $responseFactory = $this->responseFactory->json();
+            return $responseFactory->error();
         }
     }
     public function show(ServerRequestInterface $request, $params): ResponseInterface
@@ -188,8 +189,30 @@ class LinkController
 
     }
 
-    private function registerNewLink(string $url): LinkDto
+    private function registerNewLink(string $url): ?LinkDto
     {
-
+        /** @var RegisterNewLinkUseCase $registerNewLinkUseCase */
+        $registerNewLinkUseCase = $this->useCaseFactory
+            ->create(RegisterNewLinkUseCase::class);
+        return $registerNewLinkUseCase->execute($url) ?? null;
     }
+
+    private function getRequestPayload(RequestInterface $request, string $key): ?string
+    {
+        $requestBody = $request->getBody();
+        $contents = $requestBody->getContents();
+        $array = json_decode($contents, associative: true);
+        return $array[$key] ?? null;
+    }
+
+    private function validate(?string $url): bool
+    {
+        if (empty($url)) {
+            $valid = false;
+        }
+
+        return $valid ?? true;
+    }
+
+
 }

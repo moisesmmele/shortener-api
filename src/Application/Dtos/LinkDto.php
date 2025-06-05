@@ -11,12 +11,14 @@ final class LinkDto
     private string $id;
     private string $longUrl;
     private string $shortcode;
+    private string $createdAt;
 
-    public function __construct(string $id, string $longUrl, string $shortcode)
+    public function __construct(string $id, string $longUrl, string $shortcode, string $createdAt)
     {
         $this->id = $id;
         $this->longUrl = $longUrl;
         $this->shortcode = $shortcode;
+        $this->createdAt = $createdAt;
     }
 
     public static function fromEntity(Link $link): self
@@ -24,7 +26,8 @@ final class LinkDto
         return new self(
             $link->getId(),
             $link->getLongUrl(),
-            $link->getShortcode()
+            $link->getShortcode(),
+            $link->getCreatedAtString()
         );
     }
 
@@ -41,5 +44,9 @@ final class LinkDto
     public function getShortcode(): string
     {
         return $this->shortcode;
+    }
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
     }
 }

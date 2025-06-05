@@ -94,4 +94,9 @@ class Link
     {
         $this->createdAt = $createdAt;
     }
+
+    public function getCreatedAtString(): string
+    {
+        return $this->createdAt->format('Y-m-d H:i:s');
+    }
 }

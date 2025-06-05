@@ -5,30 +5,22 @@ declare(strict_types=1);
 namespace Moises\ShortenerApi\Application\UseCases;
 
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
+use Moises\ShortenerApi\Application\Mappers\LinkMapper;
 use Moises\ShortenerApi\Domain\Factories\LinkFactory;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
 
 class RegisterNewLinkUseCase
 {
-    private LinkRepository $linkRepository;
-    private LinkFactory $shortenerService;
-    public function __construct(LinkFactory $shortenerService, LinkRepository $linkRepository)
-    {
-        $this->linkRepository = $linkRepository;
-        $this->shortenerService = $shortenerService;
-    }
+    public function __construct(
+        private LinkFactory $linkFactory,
+        private LinkRepository $linkRepository,
+        private LinkMapper $linkMapper,
+    ){}
 
     public function execute(String $url): ?LinkDto
     {
-        $link = $this->shortenerService->generateShortLink($url);
+        $link = $this->linkFactory->create($url);
         $this->linkRepository->save($link);
-        return LinkDto::fromEntity($link);
-    }
-    public function validateShortcode(?array $params = null, ?string $path = null): string
-    {
-        if (!is_null($path)) {
-            return str_replace('/', '', $path);
-        }
-        return $params['shortcode'] ?? 'unknown';
+        return $this->linkMapper->toDto($link);
     }
 }

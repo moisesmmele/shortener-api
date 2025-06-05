@@ -18,7 +18,7 @@ class LinkFactory
     )
     {}
 
-    public function generateShortLink(string $longUrl): Link
+    public function create(string $longUrl): Link
     {
         $link = new Link();
         $link->setId($this->identityGenerator->generate());

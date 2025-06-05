@@ -14,6 +14,7 @@ class LinkMapper
         $link->setShortcode($linkDto->getShortcode());
         $link->setLongUrl($linkDto->getLongUrl());
         $link->setShortcodeMaxLength(strlen($linkDto->getShortcode()));
+        $link->setCreatedAt($linkDto->getCreatedAt());
         return $link;
     }
 

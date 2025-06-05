@@ -27,4 +27,10 @@ interface ResponseDecoratorInterface
         array $data = [],
         int $statusCode = 404,
     ): ResponseInterface;
+
+    public function badRequest(
+        string $message = '400 Bad Request',
+        array $data = [],
+        int $statusCode = 400,
+    ): ResponseInterface;
 }

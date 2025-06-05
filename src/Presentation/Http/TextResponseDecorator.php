@@ -11,12 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 
 class TextResponseDecorator implements ResponseDecoratorInterface
 {
-    private ResponseInterface $response;
-
-    public function __construct(ResponseInterface $response)
-    {
-        $this->response = $response;
-    }
+    public function __construct(private ResponseInterface $response){}
 
     public function success(
         string $message = '200 OK',
@@ -66,4 +61,21 @@ class TextResponseDecorator implements ResponseDecoratorInterface
 
         return $response;
     }
+    public function badRequest(
+        string $message = '400 Bad Request',
+        array $data = [],
+        int $statusCode = 400,
+    ): ResponseInterface
+    {
+        $response = $this->response
+            ->withHeader('Content-Type', 'text/plain')
+            ->withStatus($statusCode);
+
+        $stream = $response->getBody();
+        $stream->rewind();
+        $stream->write($message);
+
+        return $response;
+    }
+
 }
