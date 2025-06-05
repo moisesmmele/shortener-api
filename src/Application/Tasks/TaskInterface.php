@@ -1,6 +1,6 @@
 <?php
 
-namespace Moises\ShortenerApi\Application\Contracts\Tasks;
+namespace Moises\ShortenerApi\Application\Tasks;
 
 interface TaskInterface
 {

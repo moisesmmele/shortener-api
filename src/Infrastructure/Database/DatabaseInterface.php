@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Moises\ShortenerApi\Application\Contracts;
+namespace Moises\ShortenerApi\Infrastructure\Database;
 
 interface DatabaseInterface
 {

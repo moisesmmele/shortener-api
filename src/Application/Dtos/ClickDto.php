@@ -6,8 +6,8 @@ use Moises\ShortenerApi\Domain\Entities\Click;
 
 final class ClickDto
 {
-    private int $id;
-    private int $link_id;
+    private string $id;
+    private string $link_id;
     private \DateTimeImmutable $utcTimestamp;
     private string $utcTimestampString;
     private string $sourceIp;

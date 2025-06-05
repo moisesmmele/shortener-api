@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Database;
 
-use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
 use MongoDB\Client;
 
 class MongoAdapter implements DatabaseInterface

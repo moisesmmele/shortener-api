@@ -5,24 +5,21 @@ declare(strict_types=1);
 namespace Moises\ShortenerApi\Presentation\Http\Controllers;
 
 use Laminas\Diactoros\Response\JsonResponse;
-use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
+use Moises\ShortenerApi\Application\Dtos\LinkDto;
 use Moises\ShortenerApi\Application\UseCases\CollectClicksByLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
+use Moises\ShortenerApi\Application\UseCases\UseCaseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
 class LinkController
 {
-    private UseCaseFactoryInterface $useCaseFactory;
-    private LoggerInterface $logger;
-
-    public function __construct(UseCaseFactoryInterface $useCaseFactory, LoggerInterface $logger)
-    {
-        $this->useCaseFactory = $useCaseFactory;
-        $this->logger = $logger;
-    }
+    public function __construct(
+        private UseCaseFactoryInterface $useCaseFactory,
+        private LoggerInterface $logger
+    ){}
 
     public function create(ServerRequestInterface $request): ResponseInterface
     {
@@ -179,5 +176,20 @@ class LinkController
             return new JsonResponse($responseBody, 500);
         }
         return new JsonResponse($body, 200);
+    }
+
+    private function resolveShortcode(string $shortcode): string
+    {
+
+    }
+
+    private function collectClicks(LinkDto $linkDto): array
+    {
+
+    }
+
+    private function registerNewLink(string $url): LinkDto
+    {
+
     }
 }

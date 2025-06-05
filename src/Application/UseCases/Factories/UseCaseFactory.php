@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application\UseCases\Factories;
 
-use Moises\ShortenerApi\Application\Contracts\UseCaseFactoryInterface;
+use Moises\ShortenerApi\Application\UseCases\UseCaseFactoryInterface;
 use Psr\Container\ContainerInterface;
 
 class UseCaseFactory implements UseCaseFactoryInterface

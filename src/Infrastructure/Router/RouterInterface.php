@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Moises\ShortenerApi\Application\Contracts\Router;
+namespace Moises\ShortenerApi\Infrastructure\Router;
 
-use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 interface RouterInterface extends RequestHandlerInterface
 {

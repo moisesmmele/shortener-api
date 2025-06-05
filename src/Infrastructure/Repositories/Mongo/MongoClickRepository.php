@@ -23,9 +23,8 @@ class MongoClickRepository implements ClickRepository
     {
 
         $collection = $this->client->getCollection($_ENV['DB_NAME'], 'clicks');
-        $id = $collection->countDocuments() + 1;
         $result = $collection->insertOne([
-            'id' => $id,
+            'id' => $click->getId(),
             'link_id' => $click->getLinkId(),
             'utc_timestamp' => $click->getUtcTimestampString(),
             'source_ip' => $click->getSourceIp(),

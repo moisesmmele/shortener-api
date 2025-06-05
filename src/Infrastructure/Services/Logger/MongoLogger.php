@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Services\Logger;
 
-use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
+use Moises\ShortenerApi\Infrastructure\Database\DatabaseInterface;
 use Moises\ShortenerApi\Infrastructure\Database\MongoAdapter;
 use MongoDB\BSON\UTCDateTime;
 use Psr\Log\LoggerInterface;

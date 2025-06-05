@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure;
 
-use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
+use Moises\ShortenerApi\Infrastructure\Router\RouterInterface;
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
 class App
 {

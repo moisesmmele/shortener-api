@@ -29,6 +29,7 @@ class ClickFactory
         $click->setSourceIp($sourceAddress);
         $click->setReferrer($referrerAddress);
         $click->setUtcTimestamp($this->timestampGenerator->generate());
+        $click->setFlag('notImplemented');
         return $click;
     }
 }

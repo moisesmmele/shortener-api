@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Database;
 
-use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
-
 class SqlitePdoAdapter implements DatabaseInterface
 {
     private \PDO $pdo;

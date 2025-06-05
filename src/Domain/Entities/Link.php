@@ -10,6 +10,7 @@ class Link
     private string $longUrl;
     private string $shortcode;
     private int $shortcodeMaxLength = 6;
+    private \DateTimeImmutable $createdAt;
 
     public function getId(): string
     {
@@ -82,5 +83,15 @@ class Link
     public function getShortcodeMaxLength(): int
     {
         return $this->shortcodeMaxLength;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): void
+    {
+        $this->createdAt = $createdAt;
     }
 }

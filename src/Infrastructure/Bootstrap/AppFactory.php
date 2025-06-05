@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Bootstrap;
 
-use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
-use Moises\ShortenerApi\Infrastructure\App;
+use DI\Container;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
-use DI\Container;
+use Moises\ShortenerApi\Infrastructure\App;
 
 class AppFactory
 {

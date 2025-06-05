@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure\Repositories\Pdo;
 
-use Moises\ShortenerApi\Infrastructure\Database\SqlitePdoAdapter;
-use Moises\ShortenerApi\Application\Contracts\DatabaseInterface;
-use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 use Moises\ShortenerApi\Domain\Entities\Click;
 use Moises\ShortenerApi\Domain\Entities\Link;
+use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
+use Moises\ShortenerApi\Infrastructure\Database\DatabaseInterface;
+use Moises\ShortenerApi\Infrastructure\Database\SqlitePdoAdapter;
 
 class PdoClickRepository implements ClickRepository
 {

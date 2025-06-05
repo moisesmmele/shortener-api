@@ -2,7 +2,7 @@
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Moises\ShortenerApi\Application\BasicMiddleware;
-use Moises\ShortenerApi\Application\Contracts\Router\RouterInterface;
+use Moises\ShortenerApi\Infrastructure\Router\RouterInterface;
 use Moises\ShortenerApi\Presentation\Http\Controllers\ClickController;
 use Moises\ShortenerApi\Presentation\Http\Controllers\LinkController;
 use Psr\Http\Message\ServerRequestInterface as Request;

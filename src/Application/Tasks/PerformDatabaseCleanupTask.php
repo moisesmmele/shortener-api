@@ -2,7 +2,6 @@
 
 namespace Moises\ShortenerApi\Application\Tasks;
 
-use Moises\ShortenerApi\Application\Contracts\Tasks\TaskInterface;
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
 use Moises\ShortenerApi\Application\UseCases\Factories\UseCaseFactory;
 use Moises\ShortenerApi\Domain\Entities\Link;

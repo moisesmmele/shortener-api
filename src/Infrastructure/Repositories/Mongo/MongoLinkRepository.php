@@ -20,12 +20,11 @@ class MongoLinkRepository implements LinkRepository
     public function save(Link $link): Link
     {
         $collection = $this->client->getCollection($_ENV['DB_NAME'], 'links');
-        $id = $collection->countDocuments() + 1;
-        $link->setId($id);
         $result = $collection->insertOne([
             'link_id' => $link->getId(),
             'shortcode' => $link->getShortcode(),
             'long_url' => $link->getLongUrl(),
+            'created_at' => $link->getCreatedAt(),
         ]);
         return $link;
     }

@@ -33,7 +33,7 @@ class Click
 
     public function setLinkId(string $linkId): void
     {
-        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $id)) {
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $linkId)) {
             throw new \DomainException('Id should be a valid UUID-v4');
         }
 
