@@ -1,5 +1,5 @@
 # Use a stable and existing PHP-FPM image
-FROM php:8.3-fpm
+FROM php:8.4.7-fpm
 
 # Set the working directory to the standard web root
 # This is where your code will be mounted
@@ -14,12 +14,19 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     pkg-config \
     libsasl2-dev \
-    # Clean up after installation to keep the image small
+    libmemcached11 \
+    libmemcached-dev \
+    libmemcached-tools \
+    zlib1g-dev \
     --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
 
 # Install the MongoDB PHP extension using PECL
 RUN pecl install mongodb \
     && docker-php-ext-enable mongodb
+
+RUN pecl install memcached \
+    && docker-php-ext-enable memcached
 
 # Install Composer directly via curl
 # This fetches the Composer installer and places the 'composer' executable in /usr/local/bin
