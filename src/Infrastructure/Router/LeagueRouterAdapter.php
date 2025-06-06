@@ -18,10 +18,12 @@ class LeagueRouterAdapter implements RouterInterface
 {
     private Router $router;
     private LoggerInterface $logger;
+    private ContainerInterface $container;
 
     public function __construct(Router $leagueRouter, ContainerInterface $container, LoggerInterface $logger)
     {
         $this->router = $leagueRouter;
+        $this->container = $container;
         $strategy = new ApplicationStrategy();
         $strategy->setContainer($container);
         $this->router->setStrategy($strategy);
@@ -111,7 +113,14 @@ class LeagueRouterAdapter implements RouterInterface
     {
         if (!empty($middleware)) {
             foreach ($middleware as $mw) {
-                $route->middleware($mw);
+                // If it's a string, resolve it from the container
+                if (is_string($mw)) {
+                    $middlewareInstance = $this->container->get($mw);
+                    $route->middleware($middlewareInstance);
+                } else {
+                    // If it's already an instance, use it directly
+                    $route->middleware($mw);
+                }
             }
         }
     }

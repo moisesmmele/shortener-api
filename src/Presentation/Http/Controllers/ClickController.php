@@ -12,19 +12,9 @@ use Moises\ShortenerApi\Presentation\Http\Factories\ResponseDecoratorFactory;
 use Psr\Http\Message\{ServerRequestInterface, ResponseInterface};
 use Psr\Log\LoggerInterface;
 
-//TODO: ADD REQUEST VALIDATION (PROBABLY WITH DTO) TO REMOVE VALIDATION FROM CONTROLLER
-
 /** @clickController
  * This class is responsible for executing Http logic related to the Click resource.
- * Some observations: iy'm not sure if this is the correct way to declare a controller
- * following modern architectural design for a few reasons: i'm handling some validation
- * inside this controller. i don't believe that controllers should be responsible for any
- * validation at all, but i'm at a lost considering that afaik this is the only place where
- * i can "resolve" the necessary resources. Well, if i'm resolving the resources here, then
- * it makes at least a little bit of sense to validate them here, although it's a controller.
- * They are related to Http requests, so maybe it's not THAT wrong, but i digress.
- *
- * The other thing is related to useCase instantiation.
+ * Some observations:
  * I may be using an "antipattern" (service locator) to instantiate my useCases, but that's
  * because i don't see how it's better to actually inject many use cases that i may not use.
  * Sure, in this scenario, it's not a real problem. But if I had more methods (hence, more
@@ -60,21 +50,12 @@ class ClickController
 
         //try to resolve link and register click
         try {
-            //get necessary variables
-            $shortcode = $this->getShortcode($params);
-            $sourceAddress = $this->getSourceAddress($request);
-            $referrerAddress = $this->getReferrer($request);
-            //validate if any of the required variables are null
-            //TODO: EXTRACT VALIDATION TO REQUEST DTO
-            $valid = $this->validate($shortcode, $sourceAddress, $referrerAddress);
-            if (!$valid) {
-                //log response
-                $this->logger->info('400 Bad Request', $logContext);
-                //get a new TextResponseDecorator
-                $response = $this->responseDecoratorFactory->text();
-                //return a Bad Request response
-                return $response->badRequest();
-            }
+
+            //get necessary variables (validated previously via middleware)
+            $shortcode = $request->getAttribute('shortcode');
+            $sourceAddress = $request->getAttribute('source');
+            $referrerAddress = $request->getAttribute('referrer');
+
             //resolve the shortcode using UseCase
             $linkDto = $this->resolveShortcode($shortcode);
 
@@ -141,114 +122,6 @@ class ClickController
             $responseFactory = $this->responseDecoratorFactory->text();
             return $responseFactory->error();
         }
-    }
-
-    //helper method to get shortcode from router url param or request
-    private function getShortcode(
-        ?array $params = null, ?ServerRequestInterface $request = null): string
-    {
-        if (!is_null($params)) {
-            $shortcode = $params['shortcode'];
-        }
-        if (!is_null($request)) {
-            $path = $request->getUri()->getPath();
-            $parts = explode('/', $path);
-            $shortcode = end($parts);
-        }
-        return $shortcode ?? '';
-    }
-
-    //helper method to get source address
-    private function getSourceAddress(ServerRequestInterface $request): string
-    {
-        $serverParams = $request->getServerParams();
-
-        // Check multiple possible headers for client IP
-        $possibleHeaders = [
-            'SOURCE_ADDRESS', // Custom header
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_REAL_IP',
-            'HTTP_CLIENT_IP',
-            'REMOTE_ADDR'
-        ];
-
-        foreach ($possibleHeaders as $header) {
-            if (!empty($serverParams[$header])) {
-                // Handle comma-separated IPs (X-Forwarded-For)
-                $ip = trim(explode(',', $serverParams[$header])[0]);
-                if (filter_var(
-                    value: $ip,
-                    filter: FILTER_VALIDATE_IP,
-                    options: FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                    return $ip;
-                }
-            }
-        }
-
-        return $serverParams['REMOTE_ADDR'] ?? '';
-    }
-
-    //helper method to get referer
-    private function getReferrer(ServerRequestInterface $request): string
-    {
-        $serverParams = $request->getServerParams();
-        $possibleHeaders = [
-            'REFERRER',
-            'HTTP_REFERER',
-            'REFERRER_ADDRESS'
-        ];
-
-        foreach ($possibleHeaders as $header) {
-            if (!empty($serverParams[$header])) {
-                $address = $serverParams[$header];
-            }
-        }
-
-        return $address ?? '';
-    }
-
-    //helper method to get UserAgent. Not implemented yet.
-    //TODO: IMPLEMENT USER AGENT TRACKING
-    private function getUserAgent(ServerRequestInterface $request): string
-    {
-        $serverParams = $request->getServerParams();
-        $possibleHeaders = [
-            'HTTP_USER_AGENT',
-        ];
-
-        foreach ($possibleHeaders as $header) {
-            if (!empty($serverParams[$header])) {
-                $userAgent = $serverParams[$header];
-            }
-        }
-
-        return $userAgent ?? '';
-    }
-
-    // helper method to validate required values.
-    // referrer is passed by reference so it can be manually set for debugging in development
-    // environment when null
-    private function validate(
-        ?string $shortcode,
-        ?string $sourceAddress,
-        ?string &$referrer
-    ): bool
-    {
-        if (APP_DEBUG) {
-            error_log('[info]: shortcode: ' . $shortcode);
-            error_log('[info]: sourceAddress: ' . $sourceAddress);
-            if (empty($referrer)) {
-                $msg = '[info]: referrer empty, setting localhost referrer for debugging';
-                error_log($msg);
-                $referrer = '127.0.0.1';
-            }
-            error_log('[info]: referrer: ' . $referrer);
-        }
-
-        if (empty($shortcode) || empty($sourceAddress) || empty($referrer)) {
-            $valid = false;
-        }
-        return $valid ?? true;
     }
 
     //helper method to call ResolveShortenedLinkUseCase

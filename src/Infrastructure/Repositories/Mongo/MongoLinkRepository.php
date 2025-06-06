@@ -24,7 +24,7 @@ class MongoLinkRepository implements LinkRepository
             'link_id' => $link->getId(),
             'shortcode' => $link->getShortcode(),
             'long_url' => $link->getLongUrl(),
-            'created_at' => $link->getCreatedAt(),
+            'created_at' => $link->getCreatedAtString(),
         ]);
         return $link;
     }
@@ -42,6 +42,7 @@ class MongoLinkRepository implements LinkRepository
         $link->setId($result['link_id']);
         $link->setShortcode($result['shortcode']);
         $link->setLongUrl($result['long_url']);
+        $link->setCreatedAt($result['created_at']);
         return $link;
     }
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Application;
 
+use DateTimeImmutable;
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -13,11 +15,15 @@ class BasicMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $authkey = $request->getHeader('Authorization');
-        if (!$authkey === '1234') {
-            return $handler->handle($request)->withStatus(401);
+        //create a timestamp
+        $time = new DateTimeImmutable()->format('Y-m-d H:i:s');
+        //delegate request to handler
+        $param = $request->getAttribute('param');
+        if ($param === 'value') {
+            return new JsonResponse([], 404);
         }
         $response = $handler->handle($request);
-        return $response->withHeader('X-Basic-Middleware', 'Processed');
+        //add X-Time header
+        return $response->withHeader('X-Time-Middleware', $time);
     }
 }

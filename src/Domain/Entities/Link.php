@@ -90,8 +90,15 @@ class Link
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): void
+    public function setCreatedAt(string|\DateTimeImmutable $createdAt): void
     {
+        if (is_string($createdAt)) {
+            $pattern = '/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/';
+            if (!preg_match($pattern, $createdAt)) {
+                throw new \DomainException("Invalid datetime string format. Should be YYYY-MM-DD HH:MM:SS");
+            }
+            $createdAt = new \DateTimeImmutable($createdAt);
+        }
         $this->createdAt = $createdAt;
     }
 
