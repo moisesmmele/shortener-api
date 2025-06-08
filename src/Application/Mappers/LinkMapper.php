@@ -22,4 +22,14 @@ class LinkMapper
     {
         return LinkDto::fromEntity($link);
     }
+
+    public function toArray(Link $link): array
+    {
+        return [
+            'id' => $link->getId(),
+            'shortcode' => $link->getShortcode(),
+            'long_url' => $link->getLongUrl(),
+            'created_at' => $link->getCreatedAt()->format('Y-m-d H:i:s'),
+        ];
+    }
 }

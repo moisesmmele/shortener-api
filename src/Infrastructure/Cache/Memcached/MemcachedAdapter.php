@@ -89,7 +89,7 @@ class MemcachedAdapter implements CacheInterface
         }
 
         //check if key doesn't have special chars.
-        $pattern = '/^[a-zA-Z0-9_-]+$/';
+        $pattern = '/[^a-zA-Z0-9._-]/';
         if (preg_match($pattern, $key)) {
             throw new \InvalidArgumentException('Key has invalid characters');
         }

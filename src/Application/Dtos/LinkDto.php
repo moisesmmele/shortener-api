@@ -31,6 +31,16 @@ final class LinkDto
         );
     }
 
+    public static function fromArray(array $linkArray): self
+    {
+        return new self(
+            $linkArray['id'],
+            $linkArray['long_url'],
+            $linkArray['shortcode'],
+            $linkArray['created_at']
+        );
+    }
+
     public function getId(): string
     {
         return $this->id;

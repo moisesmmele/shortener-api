@@ -9,6 +9,7 @@ use Moises\ShortenerApi\Domain\Contracts\ShortcodeGeneratorInterface;
 use Moises\ShortenerApi\Domain\Contracts\TimestampGeneratorInterface;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
+use Moises\ShortenerApi\Infrastructure\Cache\Memcached\MemcachedAdapter;
 use Moises\ShortenerApi\Infrastructure\Cache\Memcached\MemcachedFactory;
 use Moises\ShortenerApi\Infrastructure\Generators\ShortcodeGenerator;
 use Moises\ShortenerApi\Infrastructure\Generators\TimestampGenerator;
@@ -38,7 +39,8 @@ return array(
         }
         return $routerAdapter;
     }),
-    CacheInterface::class => factory(MemcachedFactory::create(server: '172.16.99.86', port: 11211)),
+    Memcached::class => factory(MemcachedFactory::create(server: '172.16.99.86', port: 11211)),
+    CacheInterface::class => autowire(MemcachedAdapter::class),
     UseCaseFactoryInterface::class => autowire(UseCaseFactory::class),
     LinkRepository::class => autowire(MongoLinkRepository::class),
     ClickRepository::class => autowire(MongoClickRepository::class),
