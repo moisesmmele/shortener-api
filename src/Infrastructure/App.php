@@ -26,8 +26,7 @@ class App
     }
     public function handle(): void
     {
-        $response = $this->router->handle($this->request);
-        $this->router->handleResponse($response);
+       $this->router->route($this->request);
     }
     public function after(): void
     {

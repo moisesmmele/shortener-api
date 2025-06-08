@@ -4,33 +4,57 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Presentation\Http\Controllers;
 
-use Laminas\Diactoros\Response\JsonResponse;
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
 use Moises\ShortenerApi\Application\UseCases\CollectClicksByLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\UseCaseFactoryInterface;
-use Moises\ShortenerApi\Presentation\Http\Factories\ResponseDecoratorFactory;
-use Psr\Http\Message\RequestInterface;
+use Moises\ShortenerApi\Presentation\Http\Controllers\Traits\LogThrowable;
+use Moises\ShortenerApi\Presentation\Http\Response\Factories\ResponseDecoratorFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
+
+/**
+ * This class is responsible for executing Http logic related to Link Resource.
+ *
+ * Observations:
+ *
+ * I'm retrieving a query param to determine if Show method should return
+ * a resumed response (with only link data like creation date, id and count of clicks)
+ * or a full response, with data related to each click. This should probably be extracted
+ * to validation middleware and passed as an attribute, as this would allow for simpler logic
+ * here and more robust validation in the middleware itself.
+ *
+ * As stated in ClickController, I'm using a 'service locator' to instantiate use cases,
+ * but I have some reasoning behind it, check previously cited.
+ *
+ * I'm using a shared Trait LogThrowable to encapsulate throwable logging and stacktrace
+ * suppressing. The trait method uses the LoggerInterface instantiated here with the 'this'
+ * keyword, and i'm not sure if this is good practice. Both PHPStan and IDE are complaining
+ * about logger being only written, but never read, but it is being read. In the Trait.
+ */
+
+
 class LinkController
 {
     public function __construct(
-        private UseCaseFactoryInterface $useCaseFactory,
-        private ResponseDecoratorFactory $responseFactory,
-        private LoggerInterface $logger
+        private readonly UseCaseFactoryInterface $useCaseFactory,
+        private readonly ResponseDecoratorFactory $responseFactory,
+        private readonly LoggerInterface $logger
     ){}
+
+    use LogThrowable;
 
     public function create(ServerRequestInterface $request): ResponseInterface
     {
-        //get basic request info
+        //resolve variables that will be used throughout execution
         $method = $request->getMethod();
         $path = $request->getUri()->getPath();
 
         //initiate logContext array with basic info
+        /** @var array<string, mixed> $logContext */
         $logContext = [
             "class_method" => __METHOD__,
             'request' => [
@@ -39,27 +63,16 @@ class LinkController
             ]
         ];
 
+
         //try to register new link
         try {
-            //get necessary variables
-            $url = $this->getRequestPayload($request, 'url');
-            //validate if required variables are not null
-            //TODO: EXTRACT TO REQUEST VALIDATOR
-            $valid = $this->validate($url);
-            if (!$valid) {
-                //log response
-                $this->logger->info('400 Bad Request', $logContext);
-                //get a new JsonResponseDecorator
-                $response = $this->responseFactory->json();
-                //write message through payload
-                $payload = ['details' => 'No URL was provided for registration',];
-                //return a BadRequest Json Response with payload
-                return $response->badRequest(data: $payload);
-            }
+
+            //get necessary variables (validated previously via middleware)
+            $url = $request->getAttribute('url');
 
             //register the new link using UseCase
-            $linkDto = $this->registerNewLink($url);
             //no need to validate linkDto because if it fails we should throw exception
+            $linkDto = $this->registerNewLink($url);
 
             //write payload with new link data in linkDto
             $payload = [
@@ -69,61 +82,35 @@ class LinkController
                 'created_at' => $linkDto->getCreatedAt(),
             ];
 
-            //log success
-            $this->logger->info("[$method] [$path] 201 Created", $logContext);
-
             //return success json response
             $response = $this->responseFactory->json();
-            return $response->success(data: $payload, message: "201 Created", statusCode: 201);
+            return $response->success(message: "201 Created", data: $payload, statusCode: 201);
 
             //catch domain Exceptions (probably Bad Requests)
         } catch (\DomainException $domainException) {
 
-            $traceString = $domainException->getTraceAsString();
-            $traceMessage = $domainException->getMessage();
-            $logContext['exception'] = [
-                'message' => $traceMessage,
-                'trace' => $traceString,
-            ];
+            $message =$this->logThrowable('warning', $domainException, $logContext);
 
-            //if appdebug is set to true, then we can dump a stacktrace to the console
-            //otherwise, we just log it and return response
-            if (APP_DEBUG) {
-                error_log('stacktrace: ' . PHP_EOL . $traceString);
-            }
-
-            $this->logger->info('400 Bad Request', $logContext);
-            $message = "400 Bad Request ($traceMessage)";
+            //return error response with 400 Bad Request, including message
             $responseFactory = $this->responseFactory->json();
-            return $responseFactory->error(message: $message);
+            return $responseFactory->badRequest(message: $message);
 
             //catch other exceptions (probably 500s Internal server Error)
-        } catch (\Exception $exception) {
-            $traceString = $exception->getTraceAsString();
-            $traceMessage = $exception->getMessage();
-            $logContext['exception'] = [
-                'message' => $traceMessage,
-                'trace' => $traceString,
-            ];
+        } catch (\Throwable $throwable) {
 
-            //if appdebug, we can formulate a more detailed message to output to console
-            //otherwise, just log it
-            if (APP_DEBUG) {
-                $message = "500 Internal Server Error".PHP_EOL.$traceMessage.PHP_EOL.$traceString;
-            } else {
-                $message = "500 Internal Server Error";
-            }
-            $this->logger->error($message, $logContext);
+            $this->logThrowable('warning', $throwable, $logContext);
+
+            //error response without context to avoid sensitive leaking
             $responseFactory = $this->responseFactory->json();
             return $responseFactory->error();
         }
     }
-    public function show(ServerRequestInterface $request, $params): ResponseInterface
+    public function show(ServerRequestInterface $request): ResponseInterface
     {
-        $shortcode = $params['shortcode'];
+        /* As always, resolve necessary variables and logContext
+         * */
         $method = $request->getMethod();
-        $uri = $request->getUri();
-        $path = $uri->getPath();
+        $path = $request->getUri()->getPath();
         $logContext = [
             "class_method" => __METHOD__,
             'request' => [
@@ -131,88 +118,96 @@ class LinkController
                 'path' => $path,
             ]
         ];
+
         try {
-            $resolveShortenedLinkUseCase = $this->useCaseFactory->create(ResolveShortenedLinkUseCase::class);
-            $collectClicksByLinkUseCase = $this->useCaseFactory->create(CollectClicksByLinkUseCase::class);
-            $linkDto = $resolveShortenedLinkUseCase->execute($shortcode);
-            $clicks = $collectClicksByLinkUseCase->execute($linkDto);
-            $clicksArray = [];
-            foreach ($clicks as $click) {
-                $clicksArray[] = [
-                    'id' => $click->getId(),
-                    'sourceAddress' => $click->getSourceIp(),
-                    'referrerAddress' => $click->getReferrer(),
-                    'timestamp' => $click->getUtcTimestampString(),
-                ];
+
+            // get the shortcode attribute set and validated previously in middleware
+            $shortcode = $request->getAttribute('shortcode');
+
+            // get linkDto trough helper method that uses UseCase
+            $linkDto = $this->resolveShortcode($shortcode);
+
+            // if linkDto empty return not found
+            if (!$linkDto) {
+                $rf = $this->responseFactory->json();
+                return $rf->notFound();
             }
-            $body = [
+
+            // get clicks via helper method that uses UseCase
+            $clicks = $this->collectClicks($linkDto);
+
+            // create response payload
+            $payload = [
                 'status' => 'OK',
                 'link' => [
                     'id' => $linkDto->getId(),
                     'shortCode' => $linkDto->getShortCode(),
                     'longUrl' => $linkDto->getLongUrl(),
+                    'count' => count($clicks),
                 ],
-                'clicks' => $clicksArray,
             ];
-        } catch (\Throwable $exception) {
-            $message =  $exception->getMessage();
-            $code = $exception->getCode();
-            $trace  = $exception->getTrace();
-            $traceString = $exception->getTraceAsString();
-            $logContext['outcome'] = 'Exception';
-            $logContext['exception'] = [
-                'message' => $message,
-                'code' => $code,
-                'trace' => $trace,
-                'traceString' => $traceString,
-            ];
-            $this->logger->error("[$method] [$path] 500 Internal Server Error ($message)", $logContext);
-            $responseBody = [
-                'message' => 'Internal Server Error',
-                'details' => "$message",
-            ];
-            if (APP_DEBUG) {
-                error_log("trace:" . PHP_EOL . "$traceString");
+
+            // verify if query param resumed is string false
+            // if it is, append clicks array
+            // if it isn't, coalesce to null to suppress undefined array key warning
+            // not the best check but oh well
+            $isResumed = $request->getQueryParams()['resumed'] ?? 'true';
+            if ($isResumed === 'false') {
+                $payload['link']['clicks'] = $clicks;
             }
-            return new JsonResponse($responseBody, 500);
+
+            //return json response with payload
+            $responseFactory = $this->responseFactory->json();
+            return $responseFactory->success(data: $payload);
+
+        // catch throwable, no need to distinct between domain exceptions cuz
+        // it's not possible for this flux to throw it.
+        } catch (\Throwable $throwable) {
+
+            // log it
+            $this->logThrowable('warning', $throwable, $logContext);
+
+            // return json error response
+            $responseFactory = $this->responseFactory->json();
+            return $responseFactory->error();
         }
-        return new JsonResponse($body, 200);
     }
 
-    private function resolveShortcode(string $shortcode): string
+    private function resolveShortcode(string $shortcode): ?LinkDto
     {
-
+        /* @var ResolveShortenedLinkUseCase $resolveShortenedLinkUseCase */
+        $resolveShortenedLinkUseCase = $this->useCaseFactory
+            ->create(ResolveShortenedLinkUseCase::class);
+        return $resolveShortenedLinkUseCase->execute($shortcode);
     }
 
+    /**
+     * @param LinkDto $linkDto
+     * @return array<string, mixed>
+     */
     private function collectClicks(LinkDto $linkDto): array
     {
-
+        /** @var CollectClicksByLinkUseCase $collectClicksByLinkUseCase */
+        $collectClicksByLinkUseCase = $this->useCaseFactory
+            ->create(CollectClicksByLinkUseCase::class);
+        $clicks = $collectClicksByLinkUseCase->execute($linkDto);
+        $clicksArray = [];
+        foreach ($clicks as $click) {
+            $clicksArray[] = [
+                'id' => $click->getId(),
+                'sourceAddress' => $click->getSourceIp(),
+                'referrerAddress' => $click->getReferrer(),
+                'timestamp' => $click->getUtcTimestampString(),
+            ];
+        }
+        return $clicksArray;
     }
 
-    private function registerNewLink(string $url): ?LinkDto
+    private function registerNewLink(string $url): LinkDto
     {
         /** @var RegisterNewLinkUseCase $registerNewLinkUseCase */
         $registerNewLinkUseCase = $this->useCaseFactory
             ->create(RegisterNewLinkUseCase::class);
-        return $registerNewLinkUseCase->execute($url) ?? null;
+        return $registerNewLinkUseCase->execute($url);
     }
-
-    private function getRequestPayload(RequestInterface $request, string $key): ?string
-    {
-        $requestBody = $request->getBody();
-        $contents = $requestBody->getContents();
-        $array = json_decode($contents, associative: true);
-        return $array[$key] ?? null;
-    }
-
-    private function validate(?string $url): bool
-    {
-        if (empty($url)) {
-            $valid = false;
-        }
-
-        return $valid ?? true;
-    }
-
-
 }

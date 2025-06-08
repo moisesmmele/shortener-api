@@ -4,9 +4,9 @@
 //success, error, notFound and other should be helper methods.
 //Also, should implement a way to add headers.
 
-namespace Moises\ShortenerApi\Presentation\Http;
+namespace Moises\ShortenerApi\Presentation\Http\Response;
 
-use Moises\ShortenerApi\Presentation\Http\Contracts\ResponseDecoratorInterface;
+use Moises\ShortenerApi\Presentation\Http\Response\Contracts\ResponseDecoratorInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class TextResponseDecorator implements ResponseDecoratorInterface

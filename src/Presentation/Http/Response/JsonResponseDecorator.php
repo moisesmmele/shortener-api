@@ -1,11 +1,11 @@
 <?php
 
-namespace Moises\ShortenerApi\Presentation\Http;
+namespace Moises\ShortenerApi\Presentation\Http\Response;
 
-use Moises\ShortenerApi\Presentation\Http\Contracts\ResponseDecoratorInterface;
+use Moises\ShortenerApi\Presentation\Http\Response\Contracts\ResponseDecoratorInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class JsonResponseDecorator implements ResponseDecoratorInterface
+class JsonResponseDecorator extends ResponseDecorator implements ResponseDecoratorInterface
 {
     public function __construct(private ResponseInterface $response){}
 

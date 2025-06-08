@@ -42,6 +42,7 @@ class AppFactory
         if ($_ENV['APP_DEBUG'] === 'true') {
             define('APP_DEBUG', true);
             error_reporting(E_ALL);
+            error_log('[warning]: Running in debug mode.');
         } else {
             define('APP_DEBUG', false);
         }

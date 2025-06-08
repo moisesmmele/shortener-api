@@ -17,7 +17,6 @@ use Moises\ShortenerApi\Infrastructure\Repositories\Mongo\MongoLinkRepository;
 use Moises\ShortenerApi\Infrastructure\Router\LeagueRouterAdapter;
 use Moises\ShortenerApi\Infrastructure\Router\RouterInterface;
 use Moises\ShortenerApi\Infrastructure\Services\Logger\MongoLogger;
-use Moises\ShortenerApi\Presentation\Http\Middleware\ClickValidationMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Log\LoggerInterface;

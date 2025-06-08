@@ -1,16 +1,19 @@
 <?php
 
-namespace Moises\ShortenerApi\Presentation\Http\Middleware;
+declare(strict_types=1);
 
-use Moises\ShortenerApi\Presentation\Http\Factories\ResponseDecoratorFactory;
+namespace Moises\ShortenerApi\Presentation\Http\Middleware\Validation;
+
+use Moises\ShortenerApi\Presentation\Http\Middleware\Validation\Traits\getShortcode;
+use Moises\ShortenerApi\Presentation\Http\Response\Factories\ResponseDecoratorFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 
-class ClickValidationMiddleware implements MiddlewareInterface
+class ClickValidationMiddleware implements ValidationMiddlewareInterface
 {
+    use getShortcode;
 
     public function __construct(
         private ResponseDecoratorFactory $responseFactory,
@@ -28,33 +31,27 @@ class ClickValidationMiddleware implements MiddlewareInterface
             ]
         ];
 
-        // get data
-        $shortcode = $this->getShortcode($request);
-        $referrer = $this->getReferrer($request);
-        $sourceAddress = $this->getSourceAddress($request);
-        $userAgent = $this->getUserAgent($request);
-
-        // mutate request (validate and add attributes)
-        $isRequestValid = $this->validate($shortcode, $sourceAddress, $referrer); // Fixed variable name
-        if (!$isRequestValid) {
+        // validate method returns an array of validated key pairs, although
+        // this may not be the best pattern. Validation should probably return bool
+        // and extraction should happen outside the method, but I believe this would
+        // involve some very heavy refactoring.
+        // This is very readable, though.
+        $validated = $this->validate($request);
+        if (!$validated) {
             $rf = $this->responseFactory->text();
             return $rf->badRequest();
         }
-        $request = $request
-            ->withAttribute('shortcode', $shortcode)
-            ->withAttribute('referrer', $referrer)
-            ->withAttribute('source', $sourceAddress)
-            ->withAttribute('user_agent', $userAgent);
+
+        //append validated results to request
+        foreach ($validated as $key => $value) {
+            $request = $request->withAttribute($key, $value);
+        }
+
         // delegate request to handler (router?) and receive processed response
         $response = $handler->handle($request);
 
         //return response to be emitted
         return $response->withHeader('X-Processed', '1'); //adding header as example
-    }
-    //helper method to get shortcode from router url param or request
-    private function getShortcode(ServerRequestInterface $request): string
-    {
-        return $request->getAttribute('shortcode') ?? '';
     }
 
     //helper method to get source address
@@ -131,12 +128,15 @@ class ClickValidationMiddleware implements MiddlewareInterface
     // helper method to validate required values.
     // referrer is passed by reference so it can be manually set for debugging in development
     // environment when null
-    private function validate(
-        ?string $shortcode,
-        ?string $sourceAddress,
-        ?string &$referrer
-    ): bool
+    public function validate(ServerRequestInterface $request): ?array
     {
+
+        //extract necessary data from request using helper methods
+        $shortcode = $this->getShortcode($request);
+        $referrer = $this->getReferrer($request);
+        $sourceAddress = $this->getSourceAddress($request);
+        $userAgent = $this->getUserAgent($request);
+
         if (APP_DEBUG) {
             error_log('[info]: shortcode: ' . $shortcode);
             error_log('[info]: sourceAddress: ' . $sourceAddress);
@@ -148,11 +148,21 @@ class ClickValidationMiddleware implements MiddlewareInterface
             error_log('[info]: referrer: ' . $referrer);
         }
 
+        // atm validation is pretty simple. If heavier validation is needed,
+        // it should be extracted to custom methods, but again, heavy refactoring
+        // for marginal gains.
+        //if validation fails, return null.
         if (empty($shortcode) || empty($sourceAddress) || empty($referrer)) {
-            return false;
+            return null;
         }
 
-        return true;
+        // return an array with validated data.
+        return [
+            'shortcode' => $shortcode,
+            'referrer' => $referrer,
+            'source' => $sourceAddress,
+            'user_agent' => $userAgent,
+        ];
     }
 
 }

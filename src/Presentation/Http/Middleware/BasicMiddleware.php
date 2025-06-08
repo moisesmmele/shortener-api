@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Moises\ShortenerApi\Application;
+namespace Moises\ShortenerApi\Presentation\Http\Middleware;
 
 use DateTimeImmutable;
 use Laminas\Diactoros\Response\JsonResponse;

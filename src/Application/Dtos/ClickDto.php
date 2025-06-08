@@ -27,12 +27,12 @@ final class ClickDto
         return $clickDto;
     }
 
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }
 
-    public function getLinkId(): int
+    public function getLinkId(): string
     {
         return $this->link_id;
     }

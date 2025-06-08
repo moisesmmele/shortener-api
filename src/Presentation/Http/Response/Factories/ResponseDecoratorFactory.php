@@ -1,9 +1,9 @@
 <?php
 
-namespace Moises\ShortenerApi\Presentation\Http\Factories;
-use Moises\ShortenerApi\Presentation\Http\Contracts\ResponseDecoratorInterface;
-use Moises\ShortenerApi\Presentation\Http\JsonResponseDecorator;
-use Moises\ShortenerApi\Presentation\Http\TextResponseDecorator;
+namespace Moises\ShortenerApi\Presentation\Http\Response\Factories;
+use Moises\ShortenerApi\Presentation\Http\Response\Contracts\ResponseDecoratorInterface;
+use Moises\ShortenerApi\Presentation\Http\Response\JsonResponseDecorator;
+use Moises\ShortenerApi\Presentation\Http\Response\TextResponseDecorator;
 use Psr\Http\Message\ResponseInterface;
 
 class ResponseDecoratorFactory

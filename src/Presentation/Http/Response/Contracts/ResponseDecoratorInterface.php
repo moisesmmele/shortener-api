@@ -4,7 +4,7 @@
 //success, error, notFound and other should be helper methods.
 //Also, should implement a way to add headers.
 
-namespace Moises\ShortenerApi\Presentation\Http\Contracts;
+namespace Moises\ShortenerApi\Presentation\Http\Response\Contracts;
 
 use Psr\Http\Message\ResponseInterface;
 

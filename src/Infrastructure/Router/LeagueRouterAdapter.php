@@ -10,6 +10,7 @@ use League\Route\Http\Exception\NotFoundException;
 use League\Route\Router;
 use League\Route\Strategy\ApplicationStrategy;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,7 @@ class LeagueRouterAdapter implements RouterInterface
     public function __construct(Router $leagueRouter, ContainerInterface $container, LoggerInterface $logger)
     {
         $this->router = $leagueRouter;
+
         $this->container = $container;
         $strategy = new ApplicationStrategy();
         $strategy->setContainer($container);
@@ -37,7 +39,6 @@ class LeagueRouterAdapter implements RouterInterface
         $uri = $request->getUri();
         $path = $uri->getPath();
         $logContext = [
-            'class' => get_class($this),
             'method' => __METHOD__,
             'request' => [
                 'method' => $method,
@@ -45,18 +46,17 @@ class LeagueRouterAdapter implements RouterInterface
             ]
         ];
         try {
-            $this->logger->info("New Request [$method] [$path]", $logContext);
             $response = $this->router->dispatch($request);
         } catch (NotFoundException $exception) {
-            $this->logger->info("[$method] [$path] 404 Not Found", $logContext);
             $response = new JsonResponse(['statusCode' => '404', 'message' => '404 Not Found'], 404);
         }
         return $response;
     }
 
-    public function handleResponse(ResponseInterface $response): void
+    public function handleResponse(ResponseInterface $response): ResponseInterface
     {
         (new SapiEmitter())->emit($response);
+        return $response;
     }
     public function loadRoutes(): void
     {
@@ -64,7 +64,6 @@ class LeagueRouterAdapter implements RouterInterface
             (require BASE_PATH . "/config/routes.php")($this);
         } catch (\Exception $exception) {
             $logContext = [
-                'class' => get_class($this),
                 'method' => __METHOD__,
                 'exception' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString(),
@@ -123,5 +122,18 @@ class LeagueRouterAdapter implements RouterInterface
                 }
             }
         }
+    }
+
+    public function route(ServerRequestInterface $request): void
+    {
+        $method = $request->getMethod();
+        $path = $request->getUri()->getPath();
+
+        $this->logger->info("Request: [$method] [$path]");
+        $response = $this->handle($request);
+
+        $statusCode = $response->getStatusCode();
+        $this->logger->info("Response: [$path] [$statusCode]");
+        $this->handleResponse($response);
     }
 }
