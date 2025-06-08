@@ -9,6 +9,7 @@ use Moises\ShortenerApi\Domain\Contracts\ShortcodeGeneratorInterface;
 use Moises\ShortenerApi\Domain\Contracts\TimestampGeneratorInterface;
 use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
+use Moises\ShortenerApi\Infrastructure\Cache\Memcached\MemcachedFactory;
 use Moises\ShortenerApi\Infrastructure\Generators\ShortcodeGenerator;
 use Moises\ShortenerApi\Infrastructure\Generators\TimestampGenerator;
 use Moises\ShortenerApi\Infrastructure\Generators\UuidV4Generator;
@@ -20,6 +21,7 @@ use Moises\ShortenerApi\Infrastructure\Services\Logger\MongoLogger;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
 use function DI\autowire;
 use function DI\factory;
 
@@ -36,6 +38,7 @@ return array(
         }
         return $routerAdapter;
     }),
+    CacheInterface::class => factory(MemcachedFactory::create(server: '172.16.99.86', port: 11211)),
     UseCaseFactoryInterface::class => autowire(UseCaseFactory::class),
     LinkRepository::class => autowire(MongoLinkRepository::class),
     ClickRepository::class => autowire(MongoClickRepository::class),
