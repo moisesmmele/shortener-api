@@ -12,8 +12,8 @@ class BasicDemoTask implements TaskInterface
 
     public function execute(): void
     {
-        sleep(10);
-        error_log("task was executed! shortcode: $this->shortcode");
+        sleep(2);
+        error_log("[info]: task was executed! shortcode: $this->shortcode");
     }
 
     public function __toString(): string
