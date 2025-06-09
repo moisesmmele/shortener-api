@@ -136,4 +136,14 @@ class LeagueRouterAdapter implements RouterInterface
         $this->logger->info("Response: [$path] [$statusCode]");
         $this->handleResponse($response);
     }
+
+    public function applyGlobalMiddlewares(array $middlewares): void
+    {
+        foreach ($middlewares as $mw) {
+            if (is_string($mw)) {
+                $middlewareInstance = $this->container->get($mw);
+                $this->router->middleware($middlewareInstance);
+            }
+        }
+    }
 }

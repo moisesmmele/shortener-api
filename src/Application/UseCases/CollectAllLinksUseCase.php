@@ -19,7 +19,7 @@ class CollectAllLinksUseCase
         $links = $this->linkRepository->getAll();
         $linkDtos = [];
         foreach ($links as $link) {
-            $linkDtos[] = new LinkDto::fromEntity($link);
+            $linkDtos[] = LinkDto::fromEntity($link);
         }
         return $linkDtos;
     }

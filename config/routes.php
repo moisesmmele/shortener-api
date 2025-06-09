@@ -5,12 +5,17 @@ use Moises\ShortenerApi\Infrastructure\Router\RouterInterface;
 use Moises\ShortenerApi\Presentation\Http\Controllers\ClickController;
 use Moises\ShortenerApi\Presentation\Http\Controllers\LinkController;
 use Moises\ShortenerApi\Presentation\Http\Middleware\BasicMiddleware;
+use Moises\ShortenerApi\Presentation\Http\Middleware\TimeRequestMiddleware;
 use Moises\ShortenerApi\Presentation\Http\Middleware\Validation\ClickValidationMiddleware;
 use Moises\ShortenerApi\Presentation\Http\Middleware\Validation\LinkCreateValidationMiddleware;
 use Moises\ShortenerApi\Presentation\Http\Middleware\Validation\LinkShowValidationMiddleware;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 return function (RouterInterface $router) {
+
+    //global middleware to time requests
+    $router->applyGlobalMiddlewares([TimeRequestMiddleware::class]);
+
     $router->get('/', function (Request $request) {
         return new JsonResponse([
             'status' => 'OK',
