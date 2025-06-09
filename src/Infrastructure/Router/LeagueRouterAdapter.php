@@ -29,8 +29,8 @@ class LeagueRouterAdapter implements RouterInterface
         $strategy = new ApplicationStrategy();
         $strategy->setContainer($container);
         $this->router->setStrategy($strategy);
-        $this->loadRoutes();
         $this->logger = $logger;
+        $this->loadRoutes();
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -49,6 +49,14 @@ class LeagueRouterAdapter implements RouterInterface
             $response = $this->router->dispatch($request);
         } catch (NotFoundException $exception) {
             $response = new JsonResponse(['statusCode' => '404', 'message' => '404 Not Found'], 404);
+        } catch (\Throwable $exception) {
+            $logContext['exception'] = [
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ];
+
+            $this->logger->error($logContext['exception']['message'], $logContext);
+            $response = new JsonResponse(['statusCode' => '500', 'message' => '500 Internal Server Error'], 500);
         }
         return $response;
     }
