@@ -60,4 +60,10 @@ class MongoLinkRepository implements LinkRepository
         }
         return $links;
     }
+
+
+    public function delete(Link $link): Link
+    {
+        // TODO: Implement delete() method.
+    }
 }

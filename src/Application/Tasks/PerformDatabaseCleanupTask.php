@@ -38,4 +38,9 @@ class PerformDatabaseCleanupTask implements TaskInterface
         $expiry = $link->getUtcTimestamp()->modify("+{$ttl} seconds");
         return $expiry < new \DateTime();
     }
+
+    public function __toString(): string
+    {
+        return 'PerformDatabaseCleanupTask';
+    }
 }

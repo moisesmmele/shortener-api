@@ -5,21 +5,20 @@ declare(strict_types=1);
 namespace Moises\ShortenerApi\Infrastructure;
 
 use Moises\ShortenerApi\Infrastructure\Router\RouterInterface;
+use Moises\ShortenerApi\Infrastructure\Tasks\TaskHandler;
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class App
 {
-    private RouterInterface $router;
     private ServerRequestInterface $request;
-    private ServerRequestFactoryInterface $requestFactory;
 
+    public function __construct(
+        private RouterInterface $router,
+        private ServerRequestFactoryInterface $requestFactory,
+        private TaskHandler $taskHandler,
 
-    public function __construct(RouterInterface $router, ServerRequestFactoryInterface $requestFactory)
-    {
-        $this->router = $router;
-        $this->requestFactory = $requestFactory;
-    }
+    ){}
     public function before()
     {
         $this->request = $this->requestFactory->fromGlobals();
@@ -36,10 +35,8 @@ class App
         if (IS_FASTCGI) {
             fastcgi_finish_request();
         }
-        if (IS_FASTCGI) {
-            error_log('this is after request handling');
-            error_log((new \DateTimeImmutable())->format('Y-m-d H:i:s.u'));
-        }
+
+        $this->taskHandler->run();
     }
 
     public function run()

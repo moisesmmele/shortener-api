@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Moises\ShortenerApi\Presentation\Http\Controllers;
 
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
+use Moises\ShortenerApi\Application\Tasks\BasicDemoTask;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewClickUseCase;
 use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\UseCaseFactoryInterface;
+use Moises\ShortenerApi\Infrastructure\Tasks\TaskHandler;
 use Moises\ShortenerApi\Presentation\Http\Controllers\Traits\LogThrowable;
 use Moises\ShortenerApi\Presentation\Http\Response\Factories\ResponseDecoratorFactory;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
@@ -35,6 +37,7 @@ class ClickController
     public function __construct(
         private readonly UseCaseFactoryInterface  $useCaseFactory,
         private readonly ResponseDecoratorFactory $responseDecoratorFactory,
+        private readonly TaskHandler $taskHandler,
         private readonly LoggerInterface $logger
     ){}
 
@@ -74,6 +77,17 @@ class ClickController
 
             //if Dto is not null, then we can proceed to registering the click with needed data
             $this->registerClick($linkDto, $sourceAddress, $referrerAddress, $logContext);
+
+            //create a new basic task to simulate a task with deferred execution, like email sending
+            $newTask = [
+                'class' => BasicDemoTask::class,
+                'parameters' => [
+                    'shortcode' => $shortcode,
+                ]
+            ];
+
+            // add task to queue
+            $this->taskHandler->add($newTask);
 
             //and return a redirect response with appropriate location
             $responseFactory = $this->responseDecoratorFactory->getResponse();

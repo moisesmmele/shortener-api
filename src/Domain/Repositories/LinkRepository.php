@@ -14,4 +14,6 @@ interface LinkRepository
 
     /** @return Link[] */
     public function getAll(): array;
+
+    public function delete(Link $link): Link;
 }
