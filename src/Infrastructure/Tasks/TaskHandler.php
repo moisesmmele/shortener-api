@@ -9,12 +9,12 @@ use Psr\Log\LoggerInterface;
 class TaskHandler
 {
 
-    /* Task Handler class is responsible for handling Task Queueing and deferred execution.
+    /* @description Task Handler class is responsible for handling Task Queueing and deferred execution.
      * My main objective here is to detach task execution (like database cleanups, email sending
-     * or what else from actual Request and Response cycle, which impacts TTFB heavily.
+     * or what else) from actual Request and Response cycle, which impacts TTFB heavily.
      *
      * The only clear "problem" here is a direct reliance on DI\Container, since I'm using methods
-     * not defined by PSR-11 standards. This heavily couples (albeit it shouldn't be too hard to change
+     * not defined by PSR-11 standards. This heavily couples (albeit not too hard to change
      * if needed) this class to a concrete implementation, which violates DIP. Apparently, though,
      * changing container implementations is not common, and it shouldn't be a problem.
      * a "better" pattern would be to implement a Container Adapter, but that would be a lot of work
