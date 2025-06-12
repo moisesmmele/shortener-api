@@ -13,11 +13,23 @@ class AppFactory
 {
     public static function create(): App
     {
-        self::loadEnv();
+        if (getenv('APP_ENV') === 'development') {
+            self::loadEnv();
+        }
+
         self::setDebugMode();
         self::setFastCgiMode();
-        $container = self::container();
-        return $container->make(App::class);
+
+        try {
+            $container = self::container();
+            $app = $container->make(App::class);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            error_log($e->getTraceAsString());
+            exit(1);
+        }
+
+        return $app;
     }
     public static function container(): Container
     {

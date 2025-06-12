@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  php-api:
+    build: .
+    container_name: php-api
+    ports:
+      - "8081:80"
+    volumes:
+      - ..:/var/www/html
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - MEMCACHED_HOST=${MEMCACHED_HOST}
+
+    depends_on:
+      - mongodb
+      - memcached
+    networks:
+      - api-network
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
+    volumes:
+      - mongodb_data:/data/db
+
+    networks:
+      - api-network
+
+  memcached:
+    image: memcached:1.6-alpine
+    container_name: memcached
+    ports:
+      - "11211:11211"
+    command: memcached -m 128
+    networks:
+      - api-network
+
+networks:
+  api-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

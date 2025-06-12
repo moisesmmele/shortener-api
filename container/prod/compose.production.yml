@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  php-api:
+    image: ${REGISTRY}/php-api:latest
+    container_name: php-api
+    ports:
+      - "8080:80"
+    environment:
+      - MONGODB_URI=mongodb
+      - MEMCACHED_HOST=memcached
+      - APP_ENV=production
+      - API_KEY=${API_KEY}
+    depends_on:
+      - mongodb
+      - memcached
+    networks:
+      - api-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb-prod
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - api-network
+    restart: unless-stopped
+
+  memcached:
+    image: memcached:1.6-alpine
+    container_name: memcached-prod
+    ports:
+      - "11211:11211"
+    command: memcached -m 256
+    networks:
+      - api-network
+    restart: unless-stopped
+
+networks:
+  api-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

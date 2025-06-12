@@ -11,6 +11,15 @@ use Psr\Http\Message\ResponseInterface;
 /* @description very simple CORS middleware to append Access-Control headers globally and respond
  * to preflight requests. Actual policies can be defined in policy headers array, which could be
  * read from a config file instead of directly declared here.
+ *
+ * TODO: MAKE IT WORK :P
+ * atm it's not working because Route Matching is running before middleware calling.
+ * I don't know if this is a problem with how i implemented the League Router Adapter or if
+ * it's supposed to work that way with PSR-15.
+ *
+ * I believe that the best way to handle CORS isn't even globally tho, It's on a route basis
+ * (specially for preflight), so... yeah, might have to pivot this idea. Atm it doesn't really
+ * matter.
 */
 
 class CorsMiddleware implements MiddlewareInterface
