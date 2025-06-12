@@ -11,6 +11,21 @@ class Link
     private string $shortcode;
     private int $shortcodeMaxLength = 6;
     private \DateTimeImmutable $createdAt;
+    private ?int $ttlSeconds = null; // null means no expiration
+
+    public function __construct(
+        string $id,
+        string $longUrl,
+        string $shortcode,
+        string $createdAt,
+        ?int $ttlSeconds = null
+    ){
+        $this->setId($id);
+        $this->setLongUrl($longUrl);
+        $this->setShortcode($shortcode);
+        $this->setCreatedAt($createdAt);
+        $this->setTtlSeconds($ttlSeconds);
+    }
 
     public function getId(): string
     {
@@ -105,5 +120,58 @@ class Link
     public function getCreatedAtString(): string
     {
         return $this->createdAt->format('Y-m-d H:i:s');
+    }
+
+    public function getTtlSeconds(): ?int
+    {
+        return $this->ttlSeconds;
+    }
+
+    public function setTtlSeconds(?int $ttlSeconds): void
+    {
+        if ($ttlSeconds !== null && $ttlSeconds <= 0) {
+            throw new \DomainException('TTL must be a positive number of seconds or null');
+        }
+
+        $this->ttlSeconds = $ttlSeconds;
+    }
+
+    public function isValid(?\DateTimeImmutable $currentTime = null): bool
+    {
+        // If no TTL is set, link never expires
+        if ($this->ttlSeconds === null) {
+            return true;
+        }
+
+        $currentTime = $currentTime ?? new \DateTimeImmutable();
+        $expiresAt = $this->createdAt->add(new \DateInterval("PT{$this->ttlSeconds}S"));
+
+        return $currentTime <= $expiresAt;
+    }
+
+    public function getExpiresAt(): ?\DateTimeImmutable
+    {
+        if ($this->ttlSeconds === null) {
+            return null; // Never expires
+        }
+
+        return $this->createdAt->add(new \DateInterval("PT{$this->ttlSeconds}S"));
+    }
+
+    public function getTimeUntilExpiry(?\DateTimeImmutable $currentTime = null): ?\DateInterval
+    {
+        $expiresAt = $this->getExpiresAt();
+
+        if ($expiresAt === null) {
+            return null; // Never expires
+        }
+
+        $currentTime = $currentTime ?? new \DateTimeImmutable();
+
+        if ($currentTime >= $expiresAt) {
+            return null; // Already expired
+        }
+
+        return $currentTime->diff($expiresAt);
     }
 }

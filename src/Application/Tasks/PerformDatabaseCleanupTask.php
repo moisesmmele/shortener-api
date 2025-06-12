@@ -21,22 +21,7 @@ class PerformDatabaseCleanupTask implements TaskInterface
 
     public function execute(): void
     {
-        $usecase = $this->useCaseFactory->create();
-        $links = $usecase->execute();
-        foreach ($links as $dto) {
-            if ($this->isTtlExpired($dto)) {
-                $link = new Link();
-                $link->setId($dto->getId());
-                $this->linkRepository->delete($link);
-            }
-        }
-    }
 
-    public function isTtlExpired(LinkDto $link): bool
-    {
-        $ttl = $link->getTtl();
-        $expiry = $link->getUtcTimestamp()->modify("+{$ttl} seconds");
-        return $expiry < new \DateTime();
     }
 
     public function __toString(): string

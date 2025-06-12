@@ -12,13 +12,16 @@ final class LinkDto
     private string $longUrl;
     private string $shortcode;
     private string $createdAt;
+    private ?int $ttlSeconds = null; // null means no expiration
 
-    public function __construct(string $id, string $longUrl, string $shortcode, string $createdAt)
+    public function __construct(string $id, string $longUrl, string $shortcode, string $createdAt, ?int $ttlSeconds)
     {
         $this->id = $id;
         $this->longUrl = $longUrl;
         $this->shortcode = $shortcode;
         $this->createdAt = $createdAt;
+        $this->ttlSeconds = $ttlSeconds;
+
     }
 
     public static function fromEntity(Link $link): self
