@@ -3,9 +3,11 @@
 ![PHP](https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
 
+#### OBS 1: This is not a real project. For studying purposes only. Definitely not production code.
+#### OBS 2: This Readme is outdated and does not represent the current state of this project, neither does the AI generated documentation.
+
 Lightweight PHP service for creating and tracking short URLs. Implements (my interpretation of) Clean Architecture with strict layering and PSR compliance.
 
-#### OBS: This is not a real project. For studying purposes only. Definitely not production code.
 
 
 For better project understanding, please check the AI-generated documentation:
