@@ -23,7 +23,7 @@ services:
       - .env
 
   mongodb:
-    image: mongo:6.0
+    image: docker.io/library/mongo:6.0
     container_name: mongodb-prod
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
@@ -33,25 +33,22 @@ services:
     networks:
       - internal
     restart: unless-stopped
-    # No ports exposed - only accessible from within the compose stack
 
   memcached:
-    image: memcached:1.6-alpine
+    image: docker.io/library/memcached:1.6-alpine
     container_name: memcached-prod
     command: memcached -m 256
     networks:
       - internal
     restart: unless-stopped
-    # No ports exposed - only accessible from within the compose stack
 
 networks:
   external:
     driver: bridge
-    # This network allows external access and internet connectivity
   internal:
     driver: bridge
-    internal: true  # Completely isolates from external networks
-    attachable: false  # Prevents external containers from joining this network
+    internal: true
+    attachable: false
 
 volumes:
   mongodb_data:
