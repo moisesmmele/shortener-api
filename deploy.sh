@@ -50,7 +50,7 @@ fi
 # Build image if requested
 if [[ "$build_image" == "true" ]]; then
     log "Building image from Containerfile..."
-    podman build -f Containerfile -t "$FULL_IMAGE" .
+    podman build --arch "$(uname -m)" -f Containerfile -t "$FULL_IMAGE:$(uname -m)" .
     read -p "Push image to registry? (y/n): " push_image
     if [[ "$push_image" == "y" ]]; then
         podman push "$FULL_IMAGE"
