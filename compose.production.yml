@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   shortener-api:
-    image: registry.mele.lat/shortener-api:latest
+    image: registry.mele.lat/shortener-api:${ARCH}
     container_name: shortener-api
     ports:
       - "${APP_PORT}:80"

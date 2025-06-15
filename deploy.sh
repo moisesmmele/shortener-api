@@ -5,10 +5,22 @@ set -e
 # Configuration
 REGISTRY="registry.mele.lat"
 IMAGE_NAME="shortener-api"
-IMAGE_TAG="latest"
-FULL_IMAGE="${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
 COMPOSE_FILE="compose.production.yml"
 ENV_FILE=".env"
+
+# Architecture mapping
+declare -A ARCH_MAP=(
+    ["x86_64"]="amd64"
+    ["aarch64"]="arm64"
+    ["armv7l"]="arm/v7"
+    ["armv6l"]="arm/v6"
+    ["i386"]="386"
+    ["i686"]="386"
+)
+
+SYSTEM_ARCH="$(uname -m)"
+DOCKER_ARCH="${ARCH_MAP[$SYSTEM_ARCH]:-$SYSTEM_ARCH}"
+FULL_IMAGE="${REGISTRY}/${IMAGE_NAME}:${DOCKER_ARCH}"
 
 log() {
     echo -e "\033[1;34m[INFO]\033[0m $1"
@@ -50,7 +62,7 @@ fi
 # Build image if requested
 if [[ "$build_image" == "true" ]]; then
     log "Building image from Containerfile..."
-    podman build --arch "$(uname -m)" -f Containerfile -t "$FULL_IMAGE:$(uname -m)" .
+    podman build --platform "linux/$DOCKER_ARCH" -f Containerfile -t "$FULL_IMAGE" .
     read -p "Push image to registry? (y/n): " push_image
     if [[ "$push_image" == "y" ]]; then
         podman push "$FULL_IMAGE"
@@ -77,6 +89,17 @@ EOF
     echo ".env created. Edit DB_PASSWORD."
 fi
 
+# Add or update ARCH key in .env file
+log "Setting architecture in .env file..."
+if grep -q "^ARCH=" "$ENV_FILE"; then
+    # Update existing ARCH line
+    sed -i "s/^ARCH=.*/ARCH=$DOCKER_ARCH/" "$ENV_FILE"
+else
+    # Append new ARCH line
+    echo "ARCH=$DOCKER_ARCH" >> "$ENV_FILE"
+fi
+log "Architecture set to: $DOCKER_ARCH (system: $SYSTEM_ARCH)"
+
 # Setup compose.yml symlink
 if [ -e compose.yml ]; then
     rm -f compose.yml
@@ -97,5 +120,5 @@ podman-compose -f "$COMPOSE_FILE" up -d
 log "Deployment complete! Application running at http://localhost:$(grep APP_PORT $ENV_FILE | cut -d= -f2)"
 
 # Show status and recent logs
-podman-compose -f "$COMPOSE_FILE" ps
-podman-compose -f "$COMPOSE_FILE" logs --tail=20
+# podman-compose -f "$COMPOSE_FILE" ps
+# podman-compose -f "$COMPOSE_FILE" logs --tail=20
