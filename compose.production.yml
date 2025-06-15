@@ -47,8 +47,6 @@ networks:
     driver: bridge
     internal: true
     attachable: false
-  podman:
-    external: true
 
 volumes:
   mongodb_data:
