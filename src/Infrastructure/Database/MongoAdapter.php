@@ -10,22 +10,25 @@ class MongoAdapter implements DatabaseInterface
 {
     private Client $client;
 
-    public function __construct()
+    public function __construct(
+        private string $host,
+        private int $port,
+        private string $username,
+        private string $password,
+    )
     {
-        $conn_url = "{$_ENV['DB_DRIVER']}://{$_ENV['DB_HOST']}:{$_ENV['DB_PORT']}";
-        if (isset($_ENV['DB_USE_PASSWORD'])) {
-            $credentials = [
-                'username' => $_ENV['DB_USER'],
-                'password' => $_ENV['DB_PASSWORD']
-            ];
+        $conn_url = "mongodb://{$this->host}:{$this->port}";
+        $credentials = ['username' => $this->username, 'password' => $this->password];
             $this->client = new Client($conn_url, $credentials);
-        } else {
-            $this->client = new Client($conn_url);
-        }
     }
 
     public function getClient(): Client
     {
         return $this->client;
+    }
+
+    private function createUser(): void
+    {
+
     }
 }

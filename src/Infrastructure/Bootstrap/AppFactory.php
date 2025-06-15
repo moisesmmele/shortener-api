@@ -13,14 +13,12 @@ class AppFactory
 {
     public static function create(): App
     {
-        if (getenv('APP_ENV') === 'development') {
-            self::loadEnv();
-        }
-
-        self::setDebugMode();
-        self::setFastCgiMode();
-
         try {
+            if (!isset($_ENV['APP_ENV'])) {
+                self::loadEnv();
+            }
+            self::setDebugMode();
+            self::setFastCgiMode();
             $container = self::container();
             $app = $container->make(App::class);
         } catch (\Throwable $e) {
@@ -34,12 +32,13 @@ class AppFactory
     public static function container(): Container
     {
         $containerBuilder = new ContainerBuilder();
-        $containerBuilder->addDefinitions(BASE_PATH . '/config/container/bindings.php');
+        $path = BASE_PATH . '/config/bindings.php';
+        $containerBuilder->addDefinitions($path);
         return $containerBuilder->build();
     }
     public static function loadEnv(): void
     {
-        $dotenv = Dotenv::createImmutable(BASE_PATH . '/config/');
+        $dotenv = Dotenv::createImmutable(BASE_PATH);
         try {
             $dotenv->load();
         } catch (\Throwable $exception) {

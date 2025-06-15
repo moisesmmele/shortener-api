@@ -1,6 +1,6 @@
 /vendor/
 /database/database.sqlite
-/config/.env
+/.env
 .idea/
 /.php-cs-fixer.cache
 /.phpunit.cache/

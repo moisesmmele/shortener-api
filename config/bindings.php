@@ -18,6 +18,7 @@ use Moises\ShortenerApi\Domain\Repositories\ClickRepository;
 use Moises\ShortenerApi\Domain\Repositories\LinkRepository;
 use Moises\ShortenerApi\Infrastructure\Cache\Memcached\MemcachedAdapter;
 use Moises\ShortenerApi\Infrastructure\Cache\Memcached\MemcachedFactory;
+use Moises\ShortenerApi\Infrastructure\Database\MongoAdapter;
 use Moises\ShortenerApi\Infrastructure\Generators\ShortcodeGenerator;
 use Moises\ShortenerApi\Infrastructure\Generators\TimestampGenerator;
 use Moises\ShortenerApi\Infrastructure\Generators\UuidV4Generator;
@@ -35,6 +36,19 @@ use function DI\autowire;
 use function DI\factory;
 
 return array(
+
+    //Database and repositories
+    MongoAdapter::class => factory(function () {
+        return new MongoAdapter(
+            host: $_ENV['DB_HOST'],
+            port: $_ENV['DB_PORT'],
+            username: $_ENV['DB_USER'],
+            password: $_ENV['DB_PASSWORD']);
+    }),
+
+    // Cache
+    Memcached::class => factory(MemcachedFactory::create(server: $_ENV['MEMCACHED_HOST'], port: $_ENV['MEMCACHED_PORT'])),
+    CacheInterface::class => autowire(MemcachedAdapter::class),
 
     // Logger
     LoggerInterface::class => autowire(MongoLogger::class),
@@ -55,12 +69,6 @@ return array(
         return $routerAdapter;
     }),
 
-    // Cache
-    Memcached::class => factory(MemcachedFactory::create(server: '172.16.99.86', port: 11211)),
-    CacheInterface::class => autowire(MemcachedAdapter::class),
-
-
-    //Repositories
     LinkRepository::class => autowire(MongoLinkRepository::class),
     ClickRepository::class => autowire(MongoClickRepository::class),
 

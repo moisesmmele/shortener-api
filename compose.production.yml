@@ -1,16 +1,11 @@
 version: '3.8'
 
 services:
-  php-api:
-    image: ${REGISTRY}/php-api:latest
-    container_name: php-api
+  shortener-api:
+    image: registry.mele.lat/shortener-api:latest
+    container_name: shortener-api
     ports:
       - "8080:80"
-    environment:
-      - MONGODB_URI=mongodb
-      - MEMCACHED_HOST=memcached
-      - APP_ENV=production
-      - API_KEY=${API_KEY}
     depends_on:
       - mongodb
       - memcached
@@ -23,6 +18,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    env_file:
+      - .env
 
   mongodb:
     image: mongo:6.0
@@ -30,9 +27,9 @@ services:
     ports:
       - "27017:27017"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MONGO_INITDB_DATABASE=${DB_NAME}
     volumes:
       - mongodb_data:/data/db
     networks:
