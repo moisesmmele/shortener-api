@@ -35,21 +35,38 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Check if running as root or with sudo
+check_root_access() {
+    if [[ $EUID -ne 0 ]]; then
+        if ! command_exists sudo; then
+            error "This script requires root access. Please run as root or install sudo."
+        fi
+        log "Script will use sudo for rootful podman operations"
+        SUDO="sudo"
+    else
+        log "Running as root"
+        SUDO=""
+    fi
+}
+
 # Check podman & podman-compose
 for cmd in podman podman-compose; do
     command_exists "$cmd" || error "$cmd is required but not installed"
 done
 
-# Login to registry
-log "Logging in to $REGISTRY"
+# Check root access
+check_root_access
+
+# Login to registry (rootful)
+log "Logging in to $REGISTRY (rootful mode)"
 read -p "Username: " USERNAME
 read -s -p "Password: " PASSWORD
 echo
-echo "$PASSWORD" | podman login "$REGISTRY" -u "$USERNAME" --password-stdin
+echo "$PASSWORD" | $SUDO podman login "$REGISTRY" -u "$USERNAME" --password-stdin
 
 # Check if image exists by trying to pull quietly
 log "Checking if image exists in registry..."
-if podman pull --quiet "$FULL_IMAGE" 2>/dev/null; then
+if $SUDO podman pull --quiet "$FULL_IMAGE" 2>/dev/null; then
     read -p "Image found. Use it? (y/n): " use_image
     if [[ "$use_image" != "y" ]]; then
         build_image=true
@@ -61,11 +78,11 @@ fi
 
 # Build image if requested
 if [[ "$build_image" == "true" ]]; then
-    log "Building image from Containerfile..."
-    podman build --platform "linux/$DOCKER_ARCH" -f Containerfile -t "$FULL_IMAGE" .
+    log "Building image from Containerfile (rootful mode)..."
+    $SUDO podman build --platform "linux/$DOCKER_ARCH" -f Containerfile -t "$FULL_IMAGE" .
     read -p "Push image to registry? (y/n): " push_image
     if [[ "$push_image" == "y" ]]; then
-        podman push "$FULL_IMAGE"
+        $SUDO podman push "$FULL_IMAGE"
     fi
 fi
 
@@ -107,18 +124,21 @@ fi
 ln -s "$COMPOSE_FILE" compose.yml
 log "Symlink compose.yml -> $COMPOSE_FILE created."
 
-# Deploy with podman-compose
-log "Stopping any existing deployment..."
-podman-compose -f "$COMPOSE_FILE" down -v || true
+# Deploy with podman-compose (rootful)
+log "Stopping any existing deployment (rootful mode)..."
+$SUDO podman-compose -f "$COMPOSE_FILE" down -v || true
 
-log "Pulling latest image..."
-podman pull "$FULL_IMAGE" || log "Pull failed, proceeding with local image..."
+log "Pulling latest image (rootful mode)..."
+$SUDO podman pull "$FULL_IMAGE" || log "Pull failed, proceeding with local image..."
 
-log "Starting application..."
-podman-compose -f "$COMPOSE_FILE" up -d
+log "Starting application (rootful mode)..."
+$SUDO podman-compose -f "$COMPOSE_FILE" up -d
 
 log "Deployment complete! Application running at http://localhost:$(grep APP_PORT $ENV_FILE | cut -d= -f2)"
 
 # Show status and recent logs
-# podman-compose -f "$COMPOSE_FILE" ps
-# podman-compose -f "$COMPOSE_FILE" logs --tail=20
+log "Container status:"
+$SUDO podman-compose -f "$COMPOSE_FILE" ps
+
+log "Recent logs:"
+$SUDO podman-compose -f "$COMPOSE_FILE" logs --tail=20
