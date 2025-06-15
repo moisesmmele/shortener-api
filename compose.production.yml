@@ -45,6 +45,7 @@ services:
 networks:
   external:
     driver: bridge
+    internal: false
   internal:
     driver: bridge
     internal: true
