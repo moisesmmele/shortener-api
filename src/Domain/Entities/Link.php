@@ -13,20 +13,6 @@ class Link
     private \DateTimeImmutable $createdAt;
     private ?int $ttlSeconds = null; // null means no expiration
 
-    public function __construct(
-        string $id,
-        string $longUrl,
-        string $shortcode,
-        string $createdAt,
-        ?int $ttlSeconds = null
-    ){
-        $this->setId($id);
-        $this->setLongUrl($longUrl);
-        $this->setShortcode($shortcode);
-        $this->setCreatedAt($createdAt);
-        $this->setTtlSeconds($ttlSeconds);
-    }
-
     public function getId(): string
     {
         return $this->id;

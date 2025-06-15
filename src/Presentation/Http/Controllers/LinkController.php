@@ -69,7 +69,6 @@ class LinkController
 
             //get necessary variables (validated previously via middleware)
             $url = $request->getAttribute('url');
-
             //register the new link using UseCase
             //no need to validate linkDto because if it fails we should throw exception
             $linkDto = $this->registerNewLink($url);

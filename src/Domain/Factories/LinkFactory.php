@@ -25,6 +25,7 @@ class LinkFactory
         $link->setShortcode($this->shortcodeGenerator->generate());
         $link->setCreatedAt($this->timestampGenerator->generate());
         $link->setLongUrl($longUrl);
+        $link->setTtlSeconds(null);
 
         return $link;
     }

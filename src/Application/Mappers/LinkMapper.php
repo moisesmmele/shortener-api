@@ -15,6 +15,7 @@ class LinkMapper
         $link->setLongUrl($linkDto->getLongUrl());
         $link->setShortcodeMaxLength(strlen($linkDto->getShortcode()));
         $link->setCreatedAt($linkDto->getCreatedAt());
+        $link->setTtlSeconds($linkDto->getTtlSeconds());
         return $link;
     }
 
@@ -30,6 +31,7 @@ class LinkMapper
             'shortcode' => $link->getShortcode(),
             'long_url' => $link->getLongUrl(),
             'created_at' => $link->getCreatedAt()->format('Y-m-d H:i:s'),
+            'ttl_seconds' => $link->getTtlSeconds(),
         ];
     }
 }

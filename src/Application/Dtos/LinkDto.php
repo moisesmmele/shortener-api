@@ -30,7 +30,8 @@ final class LinkDto
             $link->getId(),
             $link->getLongUrl(),
             $link->getShortcode(),
-            $link->getCreatedAtString()
+            $link->getCreatedAtString(),
+            $link->getTtlSeconds()
         );
     }
 
@@ -40,7 +41,8 @@ final class LinkDto
             $linkArray['id'],
             $linkArray['long_url'],
             $linkArray['shortcode'],
-            $linkArray['created_at']
+            $linkArray['created_at'],
+            $linkArray['ttl_seconds']
         );
     }
 
@@ -61,5 +63,9 @@ final class LinkDto
     public function getCreatedAt(): string
     {
         return $this->createdAt;
+    }
+    public function getTtlSeconds(): ?int
+    {
+        return $this->ttlSeconds;
     }
 }
