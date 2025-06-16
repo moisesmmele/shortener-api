@@ -11,7 +11,7 @@ services:
       - memcached
     networks:
       - internal
-      - podman
+      - external
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
@@ -47,8 +47,10 @@ networks:
     driver: bridge
     internal: true
     attachable: false
-  podman:
+  external:
+    driver: bridge
     external: true
+    attachable: true
 
 volumes:
   mongodb_data:
