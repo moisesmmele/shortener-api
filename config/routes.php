@@ -16,6 +16,7 @@ use Moises\ShortenerApi\Presentation\Http\Controllers\LinkController;
 
 // Middlewares
 use Moises\ShortenerApi\Presentation\Http\Middleware\CorsMiddleware;
+use Moises\ShortenerApi\Presentation\Http\Middleware\RateLimitMiddleware;
 use Moises\ShortenerApi\Presentation\Http\Middleware\TimeRequestMiddleware;
 use Moises\ShortenerApi\Presentation\Http\Middleware\Validation\ClickValidationMiddleware;
 use Moises\ShortenerApi\Presentation\Http\Middleware\Validation\LinkCreateValidationMiddleware;
@@ -27,7 +28,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 return function (RouterInterface $router) {
 
     //global middleware to time requests
-    $router->applyGlobalMiddlewares([TimeRequestMiddleware::class, CorsMiddleware::class]);
+    $router->applyGlobalMiddlewares([TimeRequestMiddleware::class, CorsMiddleware::class, RateLimitMiddleware::class]);
 
     //example route declaration with a callback function.
     $router->get('/', function (Request $request) {
