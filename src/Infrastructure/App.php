@@ -30,7 +30,7 @@ class App
     }
     public function after(): void
     {
-        //add after hooks here, like database clean up, email tasks, etc
+        //add 'after' execution code here, like database clean up, email tasks, etc
         //obs: this only makes sense when running with fastCGI (because of PHP request lifecycle yadayada
         //otherwise you're increasing TTFB and tasks should be handled by cronjobs or dispatched through a queue
         if (defined('IS_FASTCGI') && IS_FASTCGI) {
