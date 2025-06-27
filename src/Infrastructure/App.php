@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure;
 
+use Moises\ShortenerApi\Application\Tasks\PerformDatabaseCleanupTask;
 use Moises\ShortenerApi\Infrastructure\Router\RouterInterface;
 use Moises\ShortenerApi\Infrastructure\Tasks\TaskHandler;
 use Psr\Http\Message\ServerRequestFactoryInterface;
@@ -32,8 +33,16 @@ class App
         //add after hooks here, like database clean up, email tasks, etc
         //obs: this only makes sense when running with fastCGI (because of PHP request lifecycle yadayada
         //otherwise you're increasing TTFB and tasks should be handled by cronjobs or dispatched through a queue
-        if (IS_FASTCGI) {
+        if (defined('IS_FASTCGI') && IS_FASTCGI) {
             fastcgi_finish_request();
+        }
+
+        $basicTasks = [
+            PerformDatabaseCleanupTask::class,
+        ];
+
+        foreach ($basicTasks as $task) {
+            $this->taskHandler->add($task);
         }
 
         $this->taskHandler->run();

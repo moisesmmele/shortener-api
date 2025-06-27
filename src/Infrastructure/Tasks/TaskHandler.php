@@ -4,8 +4,8 @@ namespace Moises\ShortenerApi\Infrastructure\Tasks;
 
 use DI\Container;
 use Moises\ShortenerApi\Application\Tasks\TaskInterface;
-use mysql_xdevapi\Exception;
 use Psr\Log\LoggerInterface;
+use function DI\string;
 
 class TaskHandler
 {
@@ -32,25 +32,35 @@ class TaskHandler
     ){}
 
 
-    /** @description simple method to add new tasks to a Queue. It receives an associative array,
+    /** @description simple method to add new tasks to a Queue. It receives an associative array, OR
+     * a string. If String is passed, it should be the class FQN, and it will be assumed that the Task
+     * doesn't need any parameter to function. If it is an array, it should be an array
      * containing a 'class' key with a class FQN and a 'parameters' key, which should be an associative
      * array with a param name and value structure.
      * @param array<string, mixed> $task
      * @return void
      */
-    public function add(array $task): void
+    public function add(array|string $task): void
     {
-        if (!isset($task['class'])) {
-            throw new \InvalidArgumentException("Class key not found in array");
+        if (is_array($task)) {
+            if (!isset($task['class'])) {
+                throw new \InvalidArgumentException("Class key not found in array");
+            }
+            if (!isset($task['parameters'])) {
+                throw new \InvalidArgumentException("Parameters key not found in array");
+            }
+            if (!is_array($task['parameters'])) {
+                $message = "Parameters key must be an array containing a key (constructor parameter name) and a value";
+                throw new \InvalidArgumentException($message);
+            }
         }
 
-        if (!isset($task['parameters'])) {
-            throw new \InvalidArgumentException("Parameters key not found in array");
-        }
-
-        if (!is_array($task['parameters'])) {
-            $message = "Parameters key must be an array containing a key (constructor parameter name) and a value";
-            throw new \InvalidArgumentException($message);
+        if (is_string($task)) {
+            $taskFqn = $task;
+            $task = [
+                'class' => $taskFqn,
+                'parameters' => [],
+            ];
         }
 
         $this->tasks[] = $task;
