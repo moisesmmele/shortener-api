@@ -12,15 +12,13 @@ use PDO;
 
 class PdoLinkRepository implements LinkRepository
 {
-    private DatabaseInterface $database;
-    public function __construct(SqlitePdoAdapter $database)
-    {
-        $this->database = $database;
-    }
+    public function __construct(
+        private readonly SqlitePdoAdapter $pdoAdapter
+    ){}
 
     public function save(Link $link): Link
     {
-        $pdo = $this->database->getPdo();
+        $pdo = $this->pdoAdapter->getPdo();
         try {
             $pdo->beginTransaction();
             $query = "INSERT INTO links ('long_url', 'shortcode') VALUES (:long_url, :short_code)";
@@ -30,7 +28,7 @@ class PdoLinkRepository implements LinkRepository
             $stmt->execute();
             $pdo->commit();
             $id = $pdo->lastInsertId();
-            $link->setId((int) $id);
+            $link->setId($id);
             return $link;
         } catch (\Exception $exception) {
             $pdo->rollBack();
@@ -40,7 +38,7 @@ class PdoLinkRepository implements LinkRepository
 
     public function findByShortcode($shortcode): ?Link
     {
-        $pdo = $this->database->getPdo();
+        $pdo = $this->pdoAdapter->getPdo();
         try {
             $stmt = $pdo->prepare("SELECT * FROM links WHERE shortcode = :shortcode");
             $stmt->bindValue(':shortcode', $shortcode);
@@ -61,7 +59,7 @@ class PdoLinkRepository implements LinkRepository
 
     public function getAll(): array
     {
-        $pdo = $this->database->getPdo();
+        $pdo = $this->pdoAdapter->getPdo();
         try {
             $stmt = $pdo->prepare("SELECT * FROM links");
             $stmt->execute();
@@ -78,6 +76,20 @@ class PdoLinkRepository implements LinkRepository
             }
             return $links;
         } catch (\Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function delete(Link $link): void
+    {
+        $pdo = $this->pdoAdapter->getPdo();
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("DELETE FROM links WHERE id = :id");
+            $stmt->bindValue(':id', $link->getId());
+            $stmt->execute();
+        } catch (\Exception $exception) {
+            $pdo->rollBack();
             throw $exception;
         }
     }

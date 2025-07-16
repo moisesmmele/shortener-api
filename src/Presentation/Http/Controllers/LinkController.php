@@ -6,10 +6,12 @@ namespace Moises\ShortenerApi\Presentation\Http\Controllers;
 
 use Moises\ShortenerApi\Application\Dtos\LinkDto;
 use Moises\ShortenerApi\Application\UseCases\CollectClicksByLinkUseCase;
+use Moises\ShortenerApi\Application\UseCases\DeleteLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\RegisterNewLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\ResolveShortenedLinkUseCase;
 use Moises\ShortenerApi\Application\UseCases\UseCaseFactoryInterface;
 use Moises\ShortenerApi\Presentation\Http\Controllers\Traits\LogThrowable;
+use Moises\ShortenerApi\Presentation\Http\Middleware\Validation\Traits\getShortcode;
 use Moises\ShortenerApi\Presentation\Http\Response\Factories\ResponseDecoratorFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -172,6 +174,52 @@ class LinkController
         }
     }
 
+    public function destroy(ServerRequestInterface $request): ResponseInterface
+    {
+        $method = $request->getMethod();
+        $path = $request->getUri()->getPath();
+        $logContext = [
+            "class_method" => __METHOD__,
+            'request' => [
+                'method' => $method,
+                'path' => $path,
+            ]
+        ];
+
+        try {
+            // get shortcode from request attribute previously set by middleware
+            $shortCode = $request->getAttribute('shortcode');
+
+            // resolve shortcode using private method and useCase
+            $linkDto = $this->resolveShortcode($shortCode);
+
+            // instantiate a json request factory
+            $rf = $this->responseFactory->json();
+
+            // if no linkDto provided, link was not found
+            if (!$linkDto) {
+                return $rf->notFound('Link not found');
+            }
+
+            // try to delete link with private method using useCase
+            $status = $this->deleteLink($linkDto);
+
+            // if status is false, usecase was not able to delete link
+            if ($status === false) {
+                return $rf->error('unable to delete link');
+            }
+
+            // otherwise return success
+            return $rf->success('link successfully deleted');
+
+        // if any exception or error is thrown, log it and return an error
+        } catch (\Throwable $throwable) {
+            $this->logThrowable('warning', $throwable, $logContext);
+            $responseFactory = $this->responseFactory->json();
+            return $responseFactory->error(message: $throwable->getMessage());
+        }
+    }
+
     private function resolveShortcode(string $shortcode): ?LinkDto
     {
         /* @var ResolveShortenedLinkUseCase $resolveShortenedLinkUseCase */
@@ -208,5 +256,16 @@ class LinkController
         $registerNewLinkUseCase = $this->useCaseFactory
             ->create(RegisterNewLinkUseCase::class);
         return $registerNewLinkUseCase->execute($url);
+    }
+
+    private function deleteLink(LinkDto $linkDto): bool
+    {
+        $deleteLinkUseCase = $this->useCaseFactory
+            ->create(DeleteLinkUseCase::class);
+        $deleted = $deleteLinkUseCase->execute([$linkDto]);
+        if ($deleted !== 1) {
+            return false;
+        }
+        return true;
     }
 }

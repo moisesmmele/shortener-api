@@ -35,7 +35,7 @@ return function (RouterInterface $router) {
         return new JsonResponse([
             'status' => 'OK',
             'message' => 'Hello World!',
-            'hint' => 'This is a shortener API. Read more about it in the documentation: INSERT LINK HERE',
+            'hint' => 'This is a shortener API. Read more about it HERE',
             'php_version' => PHP_VERSION,
         ]);
     });
@@ -54,7 +54,7 @@ return function (RouterInterface $router) {
 
 
     // other routes
-    $router->get('/tracker/{shortcode}', [LinkController::class, 'show'], [LinkShowValidationMiddleware::class]);
-    $router->post('/register/link', [LinkController::class, 'create'], [LinkCreateValidationMiddleware::class]);
-    $router->delete('/{shortcode}', [linkController::class, 'destroy']);
+    $router->get('/clicks/{shortcode}', [LinkController::class, 'show'], [LinkShowValidationMiddleware::class]);
+    $router->post('/link', [LinkController::class, 'create'], [LinkCreateValidationMiddleware::class]);
+    $router->delete('/link/{shortcode}', [linkController::class, 'destroy']);
 };

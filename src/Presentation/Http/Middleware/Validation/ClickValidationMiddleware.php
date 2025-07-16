@@ -151,6 +151,7 @@ class ClickValidationMiddleware implements ValidationMiddlewareInterface
         // atm validation is pretty simple. If heavier validation is needed,
         // it should be extracted to custom methods, but again, heavy refactoring
         // for marginal gains.
+
         //if validation fails, return null.
         if (empty($shortcode) || empty($sourceAddress) || empty($referrer)) {
             return null;

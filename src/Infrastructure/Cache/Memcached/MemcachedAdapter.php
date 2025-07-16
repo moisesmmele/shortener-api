@@ -114,14 +114,4 @@ class MemcachedAdapter implements CacheInterface
         }
         return $ttl;
     }
-
-    private function checkSuccess(): bool
-    {
-        // if last result code is RES_SUCCESS, return true
-        if ($this->memcached->getResultCode() === Memcached::RES_SUCCESS) {
-            return true;
-        };
-
-        return false;
-    }
 }

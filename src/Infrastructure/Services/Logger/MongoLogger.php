@@ -12,14 +12,10 @@ use Psr\Log\LogLevel;
 
 class MongoLogger implements LoggerInterface
 {
-    private DatabaseInterface $database;
-    private Logger $logger;
-
-    public function __construct(MongoAdapter $mongoAdapter, Logger $logger)
-    {
-        $this->database = $mongoAdapter;
-        $this->logger = $logger;
-    }
+    public function __construct(
+        private readonly MongoAdapter $mongoAdapter,
+        private readonly Logger $logger
+    ){}
 
     public function emergency(\Stringable|string $message, array $context = []): void
     {
@@ -63,9 +59,13 @@ class MongoLogger implements LoggerInterface
 
     public function log($level, \Stringable|string $message, array $context = []): void
     {
+        // uses base logger to log message to console
         $this->logger->log($level, $message, $context);
+
+        // gets last log from base logger
         $log = $this->logger->getLastLog();
 
+        // create a context array for to-be-logged data
         $data = [
             'utc_timestamp' => new UTCDateTime(),
             'level' => $log->getLevel(),
@@ -75,13 +75,21 @@ class MongoLogger implements LoggerInterface
 
 
         try {
-            $client = $this->database->getClient();
+            // try to get a mongoDB client from adapter
+            $client = $this->mongoAdapter->getClient();
+
+            // get collection
             $collection = $client->getCollection($_ENV['DB_NAME'], 'logs');
+
+            // inserts array of log data in database
             $collection->insertOne($data);
         } catch (\Exception $e) {
-            error_log('[warning]: Logger could not connect to database. No logs are being persisted.');
-            error_log('message: ' . $e->getMessage());
-            #error_log('stacktrace: '. PHP_EOL . $e->getTraceAsString());
+
+            // if log persistence failed, return a warning message to user via base logger.
+            $message = 'Could not connect to log database. Logs are NOT being persisted. Exception: {exception}';
+            $context = ['exception' => $e->getMessage()];
+            $this->logger->warning($message, $context);
+            ;
         }
     }
 }

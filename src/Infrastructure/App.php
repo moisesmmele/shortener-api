@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Moises\ShortenerApi\Infrastructure;
 
+use Moises\ShortenerApi\Application\Tasks\BasicDemoTask;
 use Moises\ShortenerApi\Application\Tasks\PerformDatabaseCleanupTask;
 use Moises\ShortenerApi\Infrastructure\Router\RouterInterface;
 use Moises\ShortenerApi\Infrastructure\Tasks\TaskHandler;
@@ -22,37 +23,48 @@ class App
     ){}
     public function before()
     {
+        // create request from globals using PSR-17 Compliant Request Factory Interface
         $this->request = $this->requestFactory->fromGlobals();
     }
     public function handle(): void
     {
-       $this->router->route($this->request);
+        // Route the request through router, where it will be handled accordingly
+        $this->router->route($this->request);
     }
     public function after(): void
     {
-        //add 'after' execution code here, like database clean up, email tasks, etc
-        //obs: this only makes sense when running with fastCGI (because of PHP request lifecycle yadayada
-        //otherwise you're increasing TTFB and tasks should be handled by cronjobs or dispatched through a queue
+        // check if running in fastCGI context via previously set IS_FASTCGI constant
         if (defined('IS_FASTCGI') && IS_FASTCGI) {
+
+            // allow server to return the previously emitted response
             fastcgi_finish_request();
         }
 
-        $basicTasks = [
+        // declare an array with global tasks
+        // in this example, adding a global task by simple class FQN (with no need for parameters)
+        // and another with array containing necessary values. Both are valid ways of declaring tasks
+        $globalTasks = [
             PerformDatabaseCleanupTask::class,
+            [
+                'class' => BasicDemoTask::class,
+                'parameters' => 'some parameter here'
+            ]
         ];
 
-        foreach ($basicTasks as $task) {
+        // add global tasks to task queue
+        foreach ($globalTasks as $task) {
             $this->taskHandler->add($task);
         }
 
+        // run TaskHandler
         $this->taskHandler->run();
     }
 
+    // Orchestrate execution flow
     public function run()
     {
         $this->before();
         $this->handle();
         $this->after();
     }
-
 }

@@ -62,8 +62,9 @@ class MongoLinkRepository implements LinkRepository
     }
 
 
-    public function delete(Link $link): Link
+    public function delete(Link $link): void
     {
-        // TODO: Implement delete() method.
+        $collection = $this->client->getCollection($_ENV['DB_NAME'], 'links');
+        $collection->deleteOne(['link_id' => $link->getId()]);
     }
 }

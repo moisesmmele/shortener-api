@@ -45,6 +45,7 @@ class LeagueRouterAdapter implements RouterInterface
                 'path' => $path,
             ]
         ];
+
         try {
             $response = $this->router->dispatch($request);
         } catch (NotFoundException $exception) {
